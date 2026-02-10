@@ -9,3 +9,24 @@ deprecated/
 
 # Imported translations (automatically generated from CSV files)
 *.translation
+
+# Node.js
+node_modules/
+
+# Build output
+dist/
+
+# Electron
+out/
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
