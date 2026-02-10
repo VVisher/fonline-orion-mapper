@@ -1,6 +1,9 @@
 # Ignore databases
 /source/database/
 
+# Ignore my skills
+.agent/*
+
 # Ignore deprecated folder
 deprecated/
 
