@@ -1,0 +1,4045 @@
+// Author: cvet
+// Mapper main script
+// Compile using fo_mapper.dll
+
+//
+// API specification
+//
+/*
+// / Reserved functions
+// void start()
+// uint loop()
+// bool console_message(string& message)
+// void render_iface(uint layer)
+// void render_map()
+// bool mouse_down(int click)
+// bool mouse_up(int click)
+// void mouse_move(int x, int y)
+// bool key_down(uint8 key)
+// bool key_up(uint8 key)
+// void input_lost()
+
+// / User functions
+// string FuncName(string str)
+// Call in console using '#'
+
+// / Global functions
+// void    SetDefaultCritterParam(uint index, int param)
+//  Init state: 0 ST_DIALOG_ID, 1 ST_AI_ID, 2 ST_BAG_ID, 3 ST_TEAM_IDT, 4 ST_NPC_ROLE, 5 ST_REPLICATION_TIME, 6..14 -1
+// MapperMap@+ LoadMap(string& fileName, int pathType)
+// void    UnloadMap(MapperMap@+ map)
+// bool    SaveMap(MapperMap@+ map, string& fileName, int pathType)
+// bool    ShowMap(MapperMap@+ map)
+// int     GetLoadedMaps(MapperMap@[]@+ maps)
+// void    DeleteObject(MapperObject@+ obj)
+// void    DeleteObjects(MapperObject@[]& objects)
+// void    SelectObject(MapperObject@+ obj, bool set)
+// void    SelectObjects(MapperObject@[]& objects, bool set)
+// MapperObject@+ GetSelectedObject()
+// uint    GetSelectedObjects(MapperObject@[]@+ objects)
+// MapperObject@+ GetMonitorObject(int x, int y, bool ignoreInterface = false)
+// void    GetMousePosition(int& x, int& y)
+// uint    GetMapFileNames(string@+ dir, string@[]@+ names)
+//
+// ProtoItem@+ GetProtoItem(uint16 protoId)
+// bool    LoadDat(string& datName)
+// void    MoveScreen(uint16 hexX, uint16 hexY, uint speed)
+// int     GetKeybLang()
+// string@ GetIfaceIniStr(string& key)
+// bool    LoadFont(int font, string& fontFileName)
+// void    SetDefaultFont(int font, uint color)
+// void    MouseClick(int x, int y, int button, int cursor)
+// void    KeyboardPress(uint8 key1, uint8 key2)
+//
+// void    Log(string& text)
+// string@ GetLastError()
+// int     Random(int minimum, int maximum)
+// uint    GetTick()
+// uint    GetAngelScriptProperty(int property)
+// void    SetAngelScriptProperty(int property, uint value)
+//
+// void    GetHexCoord(uint16 fromHx, uint16 fromHy, uint16& toHx, uint16& toHy, float angle, uint dist)
+// uint    GetPathLength(uint16 fromHx, uint16 fromHy, uint16 toHx, uint16 toHy, uint cut)
+// bool    GetHexPos(uint16 hx, uint16 hy, int& x, int& y)
+// bool    GetMonitorHex(int x, int y, uint16& hx, uint16& hy)
+// void    MoveHexByDir(uint16& hexX, uint16& hexY, uint8 dir, uint steps)
+// uint    GetDistantion(uint16 hexX1, uint16 hexY1, uint16 hexX2, uint16 hexY2)
+// uint8   GetDirection(uint16 fromX, uint16 fromY, uint16 toX, uint16 toY)
+// uint8   GetOffsetDir(uint16 hx, uint16 hy, uint16 tx, uint16 ty, float offset)
+//
+// void    Message(string& text)
+// void    Message(int textMsg, uint strNum)
+// void    MapMessage(string& text, uint16 hx, uint16 hy, uint timeMs, uint color, bool fade, int offsX, int offsY)
+// string@ GetMsgStr(int textMsg, uint strNum)
+// string@ GetMsgStr(int textMsg, uint strNum, uint skipCount)
+// uint    GetMsgStrNumUpper(int textMsg, uint strNum)
+// uint    GetMsgStrNumLower(int textMsg, uint strNum)
+// uint    GetMsgStrCount(int textMsg, uint strNum)
+// bool    IsMsgStr(int textMsg, uint strNum)
+// string@ ReplaceText(const string& text, const string& replace, const string& str)
+// string@ ReplaceText(const string& text, const string& replace, int i)
+//
+// uint    LoadSprite(string& name, int pathIndex)
+// uint    LoadSprite(uint16 sprNum, uint8 dir, int pathIndex)
+// int     GetSpriteWidth(uint sprId, int sprIndex)
+// int     GetSpriteHeight(uint sprId, int sprIndex)
+// uint    GetSpriteCount(uint sprId)
+// void    DrawSprite(uint sprId, int sprIndex, int x, int y, uint color)
+// void    DrawSprite(uint sprId, int sprIndex, int x, int y, int w, int h, bool scratch, bool center, uint color)
+// void    DrawText(string& text, int x, int y, int w, int h, uint color, int font, int flags)
+// void    DrawPrimitive(int primitiveType, int[]& data)
+// void    DrawMapSprite(uint16 hx, uint16 hy, uint16 effectPid, uint sprId, int sprIndex, int offsX, int offsY)
+// void    DrawCritter2d(uint crType, uint anim1, uint anim2, uint8 dir, int l, int t, int r, int b, bool scratch, bool center, uint color)
+// void    DrawCritter3d(uint instance, uint crType, uint anim1, uint anim2, int[]@+ layers, float[]@+ position, uint color)
+//
+// uint    TabGetTileDirs(int tab, string@[]@+ dirNames, bool[]@+ includeSubdirs)
+// uint    TabGetItemPids(int tab, string@+ subTab, uint16[]@+ itemPids)
+// uint    TabGetCritterPids(int tab, string@+ subTab, uint16[]@+ critterPids)
+// void    TabSetTileDirs(int tab, string@[]@+ dirNames, bool[]@+ includeSubdirs)
+// void    TabSetItemPids(int tab, string@+ subTab, uint16[]@+ itemPids)
+// void    TabSetCritterPids(int tab, string@+ subTab, uint16[]@+ critterPids)
+// void    TabDelete(int tab)
+// void    TabSelect(int tab, string@+ subTab, bool show = false)
+// void    TabSetName(int tab, string@+ subName)
+
+// / MapperObject
+// Shared parameters
+// const uint8  MapObjType
+// const uint16 ProtoId
+// const uint16 MapX
+// const uint16 MapY
+// uint8   Dir
+// const uint UID;
+// const uint ContainerUID;
+// const uint ParentUID;
+// const uint ParentChildIndex;
+// string  ScriptName
+// string  FuncName
+// uint    LightColor
+// uint8   LightDay
+// uint8   LightDirOff
+// uint8   LightRadius
+// int8    LightIntensity
+// int     UserData0..9
+//  Critter parameters
+// uint8   Critter_Cond
+// uint8   Critter_CondExt
+// int16   Critter_ParamIndex0..14
+// int     Critter_ParamValue0..14
+//  Item/Scenery shared parameters
+// int16   OffsetX
+// int16   OffsetY
+// uint8   AnimStayBegin
+// uint8   AnimStayEnd
+// uint16  AnimWait
+// string  PicMap
+// string  PicInv
+// uint8   InfoOffset
+//  Item parameters
+// uint    Item_Count
+// uint8   Item_BrokenFlags
+// uint8   Item_BrokenCount
+// uint16  Item_Deterioration
+// uint8   Item_ItemSlot
+// uint16  ITEM_TYPE_AMMOPid
+// uint    ITEM_TYPE_AMMOCount
+// uint    Item_LockerDoorId
+// uint16  Item_LockerCondition
+// uint16  Item_LockerComplexity
+// int16   Item_TrapValue
+// int     Item_Val0..9
+//  Scenery parameters
+// bool    Scenery_CanUse
+// bool    Scenery_CanTalk
+// uint    Scenery_TriggerNum
+// uint8   Scenery_ParamsCount
+// int     Scenery_Param0..4
+// uint    Scenery_ToMapPid
+// uint    Scenery_ToEntire
+// uint8   Scenery_ToDir
+// uint8   Scenery_SpriteCut
+//
+// void    Update() const
+// uint    GetChilds(MapperObject@[]@+ objects) const
+// void    MoveToHex(uint16 hexX, uint16 hexY)
+// void    MoveToHexOffset(int x, int y)
+// void    MoveToDir(uint8 dir)
+
+// / MapperMap
+// const uint16 Width
+// const uint16 Height
+// const int    WorkHexX
+// const int    WorkHexY
+// int    Time
+// bool   NoLogOut
+// string ScriptModule
+// string ScriptFunc
+
+// MapperObject@+ AddObject(uint16 hexX, uint16 hexY, int mapObjType, uint16 pid)
+// MapperObject@+ GetObject(uint16 hexX, uint16 hexY, int mapObjType, uint16 pid, uint skip) const
+// uint    GetObjects(uint16 hexX, uint16 hexY, uint radius, int mapObjType, uint16 pid, MapperObject@[]@+ objects) const
+// void    UpdateObjects() const
+// uint    GetTilesCount(uint16 hexX, uint16 hexY, bool roof) const
+// void    DeleteTile(uint16 hexX, uint16 hexY, bool roof, uint index)
+// uint    GetTile(uint16 hexX, uint16 hexY, bool roof, uint index) const
+// void    AddTile(uint16 hexX, uint16 hexY, int offsX, int offsY, int layer, bool roof, uint picHash)
+// string@ GetTileName(uint16 hexX, uint16 hexY, bool roof, uint index) const
+// void    AddTileName(uint16 hexX, uint16 hexY, int offsX, int offsY, int layer, bool roof, string@+ picName)
+// uint    GetDayTime(uint dayPart) const
+// void    SetDayTime(uint dayPart, uint time)
+// void    GetDayColor(uint dayPart, uint8& r, uint8& g, uint8& b) const
+// void    SetDayColor(uint dayPart, uint8 r, uint8 g, uint8 b)
+// void    Resize(uint16 width, uint16 height)
+
+*/
+
+#include "_mapper_defines.fos"
+#include "_macros.fos"
+#include "_itempid.fos"
+#include "mapper_blocklines.fos"
+
+# pragma bindfunc "void TestFunc(string&) -> fonline-aop_mapper.dll TestFunc"
+# pragma bindfunc "uint16 JustDance(MapperMap& dada) -> fonline-aop_mapper.dll JustDance"
+# pragma bindfunc "uint16 GonnaBeOkay(MapperMap& dada) -> fonline-aop_mapper.dll GonnaBeOkay"
+# pragma bindfunc "string& dirlist(string& str) -> fonline-aop_mapper.dll dirlist"
+# pragma bindfunc "void Trace(uint16 hx, uint16 hy, uint16 tx, uint16 ty, uint dist, array<uint>& data) -> fonline-aop_mapper.dll Trace"
+
+import void InitializeGame() from "config";
+
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Call on new mapper instance creating.
+// Return true to handle event and close new instance or
+// return false to allow creating of new mapper instance.
+bool new_instance( string commandLine )
+{
+    return false;
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Call on mapper loaded.
+void start()
+{
+    InitializeGame();
+    
+    //SetDefaultCritterParam(5, ST_KARMA);
+    SetDefaultCritterParam(6, ST_PATROL_ROUTE);
+    SetDefaultCritterParam(7, ST_AGRO_DIST);
+    SetDefaultCritterParam(8, ST_AID_DIST);
+    SetDefaultCritterParam(9, ST_DYNAMIC_BAG);
+    SetDefaultCritterParam(10, DUNGEON_POS);
+	SetDefaultCritterParam(11, ST_VAR0);
+	SetDefaultCritterParam(12, ST_VAR1);
+	SetDefaultCritterParam(13, ST_VAR2);
+	SetDefaultCritterParam(14, ST_VAR3);
+	SetDefaultCritterParam(15, ST_TEAM_ID_EXT);
+	SetDefaultCritterParam(16, MODE_FLOAT_INTENSITY);
+	SetDefaultCritterParam(17, MODE_NO_RESPAWN);
+    InitializeTabs();
+
+	PathSpriteId = LoadSprite("cirn_stuff/aoe_markers/0.png", PT_ART);
+}
+
+/*
+void InitializeTabs()
+{
+	// Fast item prototypes
+	TabDelete(TAB_FAST_ITEMS);
+	uint16[] pids;
+
+	// Special hexes
+	pids.resize(0);
+	pids.insertLast(3852); // Trigger
+	pids.insertLast(3853); // Entire
+	pids.insertLast(4012); // Scroll block
+	pids.insertLast(2141); // Light source
+	pids.insertLast(4592); // Light stopper
+	TabSetItemPids(TAB_FAST_ITEMS, "001 - special", pids);
+
+	// Blockers
+	pids.resize(0);
+	pids.insertLast(2067); // Secret Blocking Hex
+	pids.insertLast(2344); // Block Hex Auto Inviso
+	pids.insertLast(5621); // Wall blocker with light
+	pids.insertLast(5622); // Wall blocker without light
+	TabSetItemPids(TAB_FAST_ITEMS, "002 - blocker", pids);
+
+	// Wall corners
+	pids.resize(0);
+	for(uint i = 6800; i <= 6805; i++) pids.insertLast(i);
+	TabSetItemPids(TAB_FAST_ITEMS, "003 - wall corner", pids);
+
+	// Exit grids
+	pids.resize(0);
+	pids.insertLast(2049);
+	for(uint i = 4016; i <= 4023; i++) pids.insertLast(i);
+	for(uint i = 4031; i <= 4046; i++) pids.insertLast(i);
+	TabSetItemPids(TAB_FAST_ITEMS, "004 - exit grid", pids);
+
+	// Custom items
+	TabDelete(TAB_CUSTOM8);
+	TabSetName(TAB_CUSTOM8, "Cust");
+
+	// Cars
+	pids.resize(0);
+	pids.insertLast(PID_BUGGY);
+	pids.insertLast(PID_BUGGY_BAG);
+	pids.insertLast(PID_SCOUT);
+	pids.insertLast(PID_SCOUT_BAG);
+	pids.insertLast(PID_HUMMER);
+	pids.insertLast(PID_HUMMER_BAG);
+	pids.insertLast(PID_HIGHWAYMAN);
+	pids.insertLast(PID_HIGHWAYMAN_BAG);
+	pids.insertLast(PID_VERTIBIRD);
+	pids.insertLast(PID_VERTIBIRD_BAG);
+	pids.insertLast(PID_BOAT);
+	pids.insertLast(PID_BOAT_BAG);
+	TabSetItemPids(TAB_CUSTOM8, "001 - cars", pids);
+
+	// Dead bodies
+	pids.resize(0);
+	pids.insertLast(PID_ALIEN_SIDE);
+	pids.insertLast(PID_ALIEN_FORWARD);
+	pids.insertLast(PID_VAULT_DWELLER_BONES);
+	pids.insertLast(PID_HUMAN_BONES);
+	pids.insertLast(PID_DEAD_REDSHIRT_0);
+	pids.insertLast(PID_DEAD_REDSHIRT_1);
+	pids.insertLast(PID_DEAD_REDSHIRT_2);
+	TabSetItemPids(TAB_CUSTOM8, "002 - dead bodies", pids);
+
+	// Tactics tiles, tiles_0.bos
+	if(__GeometryType == GEOMETRY_TACTICS)
+	{
+			TabSetName(TAB_CUSTOM0, "TacT");
+			string@[] ftTiles = {"tiles/"};
+			bool[] includeSubdirs = {true};
+			TabSetTileDirs(TAB_CUSTOM0, ftTiles, includeSubdirs);
+	}
+
+	// Arcanum tiles, arcanum2.dat
+	if(__GeometryType == GEOMETRY_ARCANUM)
+	{
+			TabSetName(TAB_CUSTOM0, "ArcT");
+			string@[] arcanumTiles = {"art/tile/"};
+			bool[] includeSubdirs = {true};
+			TabSetTileDirs(TAB_CUSTOM0, arcanumTiles, includeSubdirs);
+	}
+}
+*/
+
+void InitializeTabs()
+{
+	
+    // FAST TAB
+    TabDelete( TAB_FAST_ITEMS );
+    array<uint16> pids;
+
+    // Special hexes
+    pids.resize( 0 );
+	pids.insertLast( 4 );   // grass
+	pids.insertLast( 5 );   // ANTI GRASS
+	pids.insertLast( 6 );   // grass
+	pids.insertLast( 7 );   // ANTI GRASS
+    pids.insertLast( 2049 );   // Exit hex
+    pids.insertLast( 2067 );   // Secret Blocking Hex
+    pids.insertLast( 2141 );   // Light source
+    pids.insertLast( 2344 );   // Block Hex Auto Inviso
+    pids.insertLast( 3852 );   // Trigger
+    pids.insertLast( 3853 );   // Entire
+    pids.insertLast( 4012 );   // Scroll block
+    pids.insertLast( 4592 );   // Light stopper
+    pids.insertLast( 5621 );   // Wall blocker with light
+    pids.insertLast( 5622 );   // Wall blocker without light
+    for( uint i = 6800; i <= 6805; i++ )
+        pids.insertLast( i );
+    for( uint i = 4016; i <= 4023; i++ )
+        pids.insertLast( i );
+    for( uint i = 4031; i <= 4046; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_FAST_ITEMS, "001 - special", pids );
+    pids.resize( 0 );
+    pids.insertLast( 2612 );
+    pids.insertLast( 2827 );
+    pids.insertLast( 2828 );
+    pids.insertLast( 2907 );
+    pids.insertLast( 2908 );
+    pids.insertLast( 2935 );
+    pids.insertLast( 2936 );
+    for( uint i = 3373; i <= 3376; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_FAST_ITEMS, "002 - light", pids );
+
+    // ARMOR TAB
+    TabDelete( TAB_CUSTOM0 );
+    pids.resize( 0 );
+    pids.insertLast( PID_LEATHER_ARMOR );
+    pids.insertLast( PID_METAL_ARMOR );
+    pids.insertLast( PID_POWERED_ARMOR );
+    pids.insertLast( PID_COMBAT_ARMOR );
+    pids.insertLast( PID_LEATHER_JACKET );
+    pids.insertLast( PID_PURPLE_ROBE );
+    pids.insertLast( PID_HARDENED_POWER_ARMOR );
+    pids.insertLast( PID_BROTHERHOOD_COMBAT_ARMOR );
+    pids.insertLast( PID_TESLA_ARMOR );
+    pids.insertLast( PID_CURED_LEATHER_ARMOR );
+    pids.insertLast( PID_ADVANCED_POWER_ARMOR );
+    pids.insertLast( PID_ADVANCED_POWER_ARMOR_MK2 );
+    pids.insertLast( PID_LEATHER_ARMOR_MK_II );
+    pids.insertLast( PID_METAL_ARMOR_MK_II );
+    pids.insertLast( PID_COMBAT_ARMOR_MK_II );
+    pids.insertLast( PID_KEEPBRIGE_ROBE );
+    TabSetItemPids( TAB_CUSTOM0, "001 - Fallout 2 armor", pids );
+    pids.resize( 0 );
+    pids.insertLast( PID_BLACK_COMBAT_ARMOR );
+    pids.insertLast( PID_JUMPSUIT );
+    pids.insertLast( PID_FAKE_JUMPSUIT );
+    pids.insertLast( PID_BLACK_ROBE );
+    pids.insertLast( PID_CHITIN_ARMOR );
+    pids.insertLast( PID_CHITIN_ARMOR_MK_II );
+    pids.insertLast( 1100 );
+    TabSetItemPids( TAB_CUSTOM0, "002 - FOnline armor", pids );
+    TabSetName( TAB_CUSTOM0, "Arm" );
+
+    // DRUGS TAB
+    TabDelete( TAB_CUSTOM1 );
+    pids.resize( 0 );
+    pids.insertLast( PID_STIMPAK );
+    pids.insertLast( PID_RADAWAY );
+    pids.insertLast( PID_ANTIDOTE );
+    pids.insertLast( PID_MENTATS );
+    pids.insertLast( PID_MUTATED_FRUIT );
+    pids.insertLast( PID_IGUANA_ON_A_STICK );
+    pids.insertLast( PID_BUFFOUT );
+    pids.insertLast( PID_MEAT_ON_A_STICK );
+    pids.insertLast( PID_NUKA_COLA );
+    pids.insertLast( PID_RAD_X );
+    pids.insertLast( PID_PSYCHO );
+    pids.insertLast( PID_BEER );
+    pids.insertLast( PID_BOOZE );
+    pids.insertLast( PID_SUPER_STIMPAK );
+    pids.insertLast( PID_JET );
+    pids.insertLast( PID_JET_ANTIDOTE );
+    pids.insertLast( PID_HEALING_POWDER );
+    pids.insertLast( PID_GAMMA_GULP_BEER );
+    pids.insertLast( PID_ROENTGEN_RUM );
+    pids.insertLast( PID_HYPO_POISON );
+    pids.insertLast( PID_COOKIE );
+    pids.insertLast( PID_MONUMENT_CHUNCK );
+    pids.insertLast( PID_ROT_GUT );
+    pids.insertLast( PID_MUTATED_TOE );
+    pids.insertLast( PID_KITTY_SEX_DRUG_AGILITY );
+    pids.insertLast( PID_KITTY_SEX_DRUG_INTELLIGENCE );
+    pids.insertLast( PID_KITTY_SEX_DRUG_STRENGTH );
+    pids.insertLast( PID_HYPO );
+    pids.insertLast( PID_BOX_OF_DOUGHNUTS );
+    TabSetItemPids( TAB_CUSTOM1, "001 - Drugs", pids );
+    TabSetName( TAB_CUSTOM1, "Drg" );
+
+    // WEAPON TAB
+    TabDelete( TAB_CUSTOM2 );
+
+    pids.resize( 0 );
+    pids.insertLast( PID_KNIFE );
+    pids.insertLast( PID_CLUB );
+    pids.insertLast( PID_SLEDGEHAMMER );
+    pids.insertLast( PID_SPEAR );
+    pids.insertLast( PID_10MM_PISTOL );
+    pids.insertLast( PID_10MM_SMG );
+    pids.insertLast( PID_HUNTING_RIFLE );
+    pids.insertLast( PID_FLAMER );
+    pids.insertLast( PID_MINIGUN );
+    pids.insertLast( PID_ROCKET_LAUNCHER );
+    pids.insertLast( PID_PLASMA_RIFLE );
+    pids.insertLast( PID_LASER_PISTOL );
+    pids.insertLast( PID_DESERT_EAGLE );
+    pids.insertLast( PID_ROCK );
+    pids.insertLast( PID_CROWBAR );
+    pids.insertLast( PID_BRASS_KNUCKLES );
+    pids.insertLast( PID_14MM_PISTOL );
+    pids.insertLast( PID_ASSAULT_RIFLE );
+    pids.insertLast( PID_PLASMA_PISTOL );
+    pids.insertLast( PID_FRAG_GRENADE );
+    pids.insertLast( PID_PLASMA_GRENADE );
+    pids.insertLast( PID_PULSE_GRENADE );
+    pids.insertLast( PID_GATLING_LASER );
+    pids.insertLast( PID_THROWING_KNIFE );
+    pids.insertLast( PID_FLARE );
+    pids.insertLast( PID_SHOTGUN );
+    pids.insertLast( PID_SUPER_SLEDGE );
+    pids.insertLast( PID_RIPPER );
+    pids.insertLast( PID_LASER_RIFLE );
+    pids.insertLast( PID_ALIEN_LASER_PISTOL );
+    pids.insertLast( PID_9MM_MAUSER );
+    pids.insertLast( PID_SNIPER_RIFLE );
+    pids.insertLast( PID_MOLOTOV_COCKTAIL );
+    pids.insertLast( PID_CATTLE_PROD );
+    pids.insertLast( PID_RED_RYDER_BB_GUN );
+    pids.insertLast( PID_RED_RYDER_LE_BB_GUN );
+    pids.insertLast( PID_ACTIVE_FLARE );
+    pids.insertLast( PID_TURBO_PLASMA_RIFLE );
+    pids.insertLast( PID_SPIKED_KNUCKLES );
+    pids.insertLast( PID_POWER_FIST );
+    pids.insertLast( PID_COMBAT_KNIFE );
+    pids.insertLast( PID_223_PISTOL );
+    pids.insertLast( PID_COMBAT_SHOTGUN );
+    pids.insertLast( PID_JONNY_BB_GUN );
+    pids.insertLast( PID_HK_CAWS );
+    pids.insertLast( PID_ROBO_ROCKET_LAUNCHER );
+    pids.insertLast( PID_SHARP_SPEAR );
+    pids.insertLast( PID_TOMMY_GUN );
+    pids.insertLast( PID_SCOPED_HUNTING_RIFLE );
+    pids.insertLast( PID_BOXING_GLOVES );
+    pids.insertLast( PID_PLATED_BOXING_GLOVES );
+    pids.insertLast( PID_HK_P90C );
+    pids.insertLast( PID_SPRINGER_RIFLE );
+    pids.insertLast( PID_ZIP_GUN );
+    pids.insertLast( PID_44_MAGNUM_REVOLVER );
+    pids.insertLast( PID_SWITCHBLADE );
+    pids.insertLast( PID_SHARPENED_POLE );
+    pids.insertLast( PID_GREASE_GUN );
+    pids.insertLast( PID_BOZAR );
+    pids.insertLast( PID_FN_FAL );
+    pids.insertLast( PID_HK_G11 );
+    pids.insertLast( PID_INDEPENDENT );
+    pids.insertLast( PID_PANCOR_JACKHAMMER );
+    pids.insertLast( PID_LIGHT_SUPPORT_WEAPON );
+    pids.insertLast( PID_PLANT_SPIKE );
+    pids.insertLast( PID_DEATHCLAW_CLAW_1 );
+    pids.insertLast( PID_DEATHCLAW_CLAW_2 );
+    pids.insertLast( PID_SHIV );
+    pids.insertLast( PID_WRENCH );
+    pids.insertLast( PID_SAWED_OFF_SHOTGUN );
+    pids.insertLast( PID_LOUISVILLE_SLUGGER );
+    pids.insertLast( PID_M60 );
+    pids.insertLast( PID_NEEDLER_PISTOL );
+    pids.insertLast( PID_AVENGER_MINIGUN );
+    pids.insertLast( PID_T9_SOLAR_SCORCHER );
+    pids.insertLast( PID_HK_G11E );
+    pids.insertLast( PID_M72_GAUSS_RIFLE );
+    pids.insertLast( PID_PHAZER );
+    pids.insertLast( PID_PK12_GAUSS_PISTOL );
+    pids.insertLast( PID_VINDICATOR_MINIGUN );
+    pids.insertLast( PID_YK32_PULSE_PISTOL );
+    pids.insertLast( PID_YK42B_PULSE_RIFLE );
+    pids.insertLast( PID_44_MAGNUM_SPEEDLOADER );
+    pids.insertLast( PID_SUPER_CATTLE_PROD );
+    pids.insertLast( PID_IMPROVED_FLAMETHROWER );
+    pids.insertLast( PID_LASER_RIFLE_EXT_CAP );
+    pids.insertLast( PID_MAGNETO_LASER_PISTOL );
+    pids.insertLast( PID_FN_FAL_NIGHT_SCOPE );
+    pids.insertLast( PID_DESERT_EAGLE_EXT_MAG );
+    pids.insertLast( PID_ASSAULT_RIFLE_EXT_MAG );
+    pids.insertLast( PID_PLASMA_PISTOL_EXT_CART );
+    pids.insertLast( PID_MEGA_POWER_FIST );
+    pids.insertLast( PID_HOLY_HAND_GRENADE );
+    pids.insertLast( PID_GOLD_NUGGET );
+    pids.insertLast( PID_URANIUM_ORE );
+    pids.insertLast( PID_FIRE_GECKO_FLAME_WEAPON );
+    pids.insertLast( PID_REFINED_ORE );
+    pids.insertLast( PID_SPECIAL_BOXER_WEAPON );
+    pids.insertLast( PID_RING_BOXING_GLOVES );
+    pids.insertLast( PID_RING_PLATED_BOXING_GLOVES );
+    pids.insertLast( PID_GUN_TURRET_WEAPON );
+    pids.insertLast( PID_FN_FAL_HPFA );
+    pids.insertLast( PID_LIL_JESUS_WEAPON );
+    pids.insertLast( PID_DUAL_MINIGUN );
+    pids.insertLast( PID_HEAVY_DUAL_MINIGUN );
+    pids.insertLast( PID_WAKIZASHI_BLADE );
+    pids.insertLast( PID_END_BOSS_KIFE );
+    pids.insertLast( PID_END_BOSS_PLASMA_GUN );
+    TabSetItemPids( TAB_CUSTOM2, "001 - Fallout 2 weapons", pids );
+
+    pids.resize( 0 );
+    pids.insertLast( PID_HEAVY_DUAL_MINIGUN_LONG_RANGE );
+    pids.insertLast( PID_MAUSER_SMG );
+    pids.insertLast( PID_ELEPHANT_GUN );
+    TabSetItemPids( TAB_CUSTOM2, "002 - FOnline weapons", pids );
+
+    TabSetName( TAB_CUSTOM2, "Wpn" );
+
+    // AMMO TAB
+    TabDelete( TAB_CUSTOM3 );
+    pids.resize( 0 );
+    pids.insertLast( PID_10MM_JHP );
+    pids.insertLast( PID_10MM_AP );
+    pids.insertLast( PID_44_MAGNUM_JHP );
+    pids.insertLast( PID_FLAMETHROWER_FUEL );
+    pids.insertLast( PID_EXPLOSIVE_ROCKET );
+    pids.insertLast( PID_14MM_AP );
+    pids.insertLast( PID_223_FMJ );
+    pids.insertLast( PID_5MM_JHP );
+    pids.insertLast( PID_5MM_AP );
+    pids.insertLast( PID_ROCKET_AP );
+    pids.insertLast( PID_SMALL_ENERGY_CELL );
+    pids.insertLast( PID_MICRO_FUSION_CELL );
+    pids.insertLast( PID_SHOTGUN_SHELLS );
+    pids.insertLast( PID_44_FMJ_MAGNUM );
+    pids.insertLast( PID_9MM_BALL );
+    pids.insertLast( PID_BBS );
+    pids.insertLast( PID_ROBO_ROCKET_AMMO );
+    pids.insertLast( PID_45_CALIBER_AMMO );
+    pids.insertLast( PID_2MM_EC_AMMO );
+    pids.insertLast( PID_4_7MM_CASELESS );
+    pids.insertLast( PID_9MM_AMMO );
+    pids.insertLast( PID_HN_NEEDLER_CARTRIDGE );
+    pids.insertLast( PID_HN_AP_NEEDLER_CARTRIDGE );
+    pids.insertLast( PID_7_62MM_AMMO );
+    pids.insertLast( PID_FLAMETHROWER_FUEL_MK_II );
+    pids.insertLast( PID_700_NITRO_EXPRESS );
+    TabSetItemPids( TAB_CUSTOM3, "001 - Ammo", pids );
+    TabSetName( TAB_CUSTOM3, "Amm" );
+
+    // MSC TAB
+    TabDelete( TAB_CUSTOM4 );
+
+    pids.resize( 0 );
+    pids.insertLast( PID_BOTTLE_CAPS );
+    pids.insertLast( PID_FIRST_AID_KIT );
+    pids.insertLast( PID_STEEL );
+    pids.insertLast( PID_DYNAMITE );
+    pids.insertLast( PID_STEALTH_BOY );
+    pids.insertLast( PID_WATER_CHIP );
+    pids.insertLast( PID_DOG_TAGS );
+    pids.insertLast( PID_ELECTRONIC_BUG );
+    pids.insertLast( PID_HOLODISK );
+    pids.insertLast( PID_MOTION_SENSOR );
+    pids.insertLast( PID_BRIEFCASE );
+    pids.insertLast( PID_BIG_BOOK_OF_SCIENCE );
+    pids.insertLast( PID_MULTI_TOOL );
+    pids.insertLast( PID_DEANS_ELECTRONICS );
+    pids.insertLast( PID_ELECTRONIC_LOCKPICKS );
+    pids.insertLast( PID_FUZZY_PAINTING );
+    pids.insertLast( PID_FIRST_AID_BOOK );
+    pids.insertLast( PID_LOCKPICKS );
+    pids.insertLast( PID_PLASTIC_EXPLOSIVES );
+    pids.insertLast( PID_SCOUT_HANDBOOK );
+    pids.insertLast( PID_WATCH );
+    pids.insertLast( PID_MOTOR );
+    pids.insertLast( PID_DOCTORS_BAG );
+    pids.insertLast( PID_SCORPION_TAIL );
+    pids.insertLast( PID_PUMP_PARTS );
+    pids.insertLast( PID_GOLD_LOCKET );
+    pids.insertLast( PID_LIGHTER );
+    pids.insertLast( PID_GUNS_AND_BULLETS );
+    pids.insertLast( PID_TAPE_RECORDER );
+    pids.insertLast( PID_URN );
+    pids.insertLast( PID_TANGLERS_HAND );
+    pids.insertLast( PID_FLOWER );
+    pids.insertLast( PID_NECKLACE );
+    pids.insertLast( PID_PSYCHIC_NULLIFIER );
+    pids.insertLast( PID_WATER_FLASK );
+    pids.insertLast( PID_ROPE );
+    pids.insertLast( PID_ACCESS_CARD );
+    pids.insertLast( PID_BLACK_COC_BADGE );
+    pids.insertLast( PID_RED_COC_BADGE );
+    pids.insertLast( PID_DISK_FEV );
+    pids.insertLast( PID_DISK_SECURITY );
+    pids.insertLast( PID_DISK_ALPHA_EXPERIMENT );
+    pids.insertLast( PID_DISK_DELTA_EXPERIMENT );
+    pids.insertLast( PID_DISK_VREES_EXPERIMENT );
+    pids.insertLast( PID_DISK_BROTHERHOOD_HONOR_CODE );
+    pids.insertLast( PID_DISK_MUTANT_TRANSMISSIONS );
+    pids.insertLast( PID_ACTIVE_GEIGER_COUNTER );
+    pids.insertLast( PID_ACTIVE_MOTION_SENSOR );
+    pids.insertLast( PID_ACTIVE_STEALTH_BOY );
+    pids.insertLast( PID_BARTER_TANDI );
+    pids.insertLast( PID_DISK_BROTHERHOOD_HISTORY );
+    pids.insertLast( PID_DISK_MAXSON_HISTORY );
+    pids.insertLast( PID_DISK_MAXSON_JOURNAL );
+    pids.insertLast( PID_SECURITY_CARD );
+    pids.insertLast( PID_YELLOW_PASS_KEY );
+    pids.insertLast( PID_SMALL_STATUETTE );
+    pids.insertLast( PID_CATS_PAW );
+    pids.insertLast( PID_BOX_OF_NOODLES );
+    pids.insertLast( PID_FROZEN_DINNER );
+    pids.insertLast( PID_TECHNICAL_MANUAL );
+    pids.insertLast( PID_MOTIVATOR );
+    pids.insertLast( PID_DISK_VAULT_RECORDS );
+    pids.insertLast( PID_DISK_MILITARY_BASE_SEC_CODE );
+    pids.insertLast( PID_CHEMISTRY_MANUAL );
+    pids.insertLast( PID_DISK_REGULATOR_TRANSMISSIONS );
+    pids.insertLast( PID_ANNA_GOLD_LOCKET );
+    pids.insertLast( PID_CAR_FUEL_CELL_CONTROLLER );
+    pids.insertLast( PID_CAR_FUEL_INJECTION );
+    pids.insertLast( PID_DAY_PASS );
+    pids.insertLast( PID_FAKE_CITIZENSHIP );
+    pids.insertLast( PID_CORNELIUS_GOLD_WATCH );
+    pids.insertLast( PID_HY_MAG_PART );
+    pids.insertLast( PID_RUBBER_BOOTS );
+    pids.insertLast( PID_SLAG_MESSAGE );
+    pids.insertLast( PID_SMITH_COOL_ITEM );
+    pids.insertLast( PID_VIC_RADIO );
+    pids.insertLast( PID_VIC_WATER_FLASK );
+    pids.insertLast( PID_ROBOT_PARTS );
+    pids.insertLast( PID_BROC_FLOWER );
+    pids.insertLast( PID_XANDER_ROOT );
+    pids.insertLast( PID_TROPHY_OF_RECOGNITION );
+    pids.insertLast( PID_GECKO_PELT );
+    pids.insertLast( PID_GOLDEN_GECKO_PELT );
+    pids.insertLast( PID_FLINT );
+    pids.insertLast( PID_NEURAL_INTERFACE );
+    pids.insertLast( PID_DIXON_EYE );
+    pids.insertLast( PID_CLIFTON_EYE );
+    pids.insertLast( PID_MEAT_JERKY );
+    pids.insertLast( PID_RADSCORPION_PARTS );
+    pids.insertLast( PID_FIREWOOD );
+    pids.insertLast( PID_CAR_FUEL_CELL );
+    pids.insertLast( PID_SHOVEL );
+    pids.insertLast( PID_HOLODISK_FAKE_V13 );
+    pids.insertLast( PID_CHEEZY_POOFS );
+    pids.insertLast( PID_PLANK );
+    pids.insertLast( PID_TRAPPER_TOWN_KEY );
+    pids.insertLast( PID_CLIPBOARD );
+    pids.insertLast( PID_GECKO_DATA_DISK );
+    pids.insertLast( PID_REACTOR_DATA_DISK );
+    pids.insertLast( PID_DECK_OF_TRAGIC_CARDS );
+    pids.insertLast( PID_YELLOW_REACTOR_KEYCARD );
+    pids.insertLast( PID_RED_REACTOR_KEYCARD );
+    pids.insertLast( PID_PLASMA_TRANSFORMER );
+    pids.insertLast( PID_SUPER_TOOL_KIT );
+    pids.insertLast( PID_TALISMAN );
+    pids.insertLast( PID_PART_REQUISITION_FORM );
+    pids.insertLast( PID_BLUE_CONDOM );
+    pids.insertLast( PID_GREEN_CONDOM );
+    pids.insertLast( PID_RED_CONDOM );
+    pids.insertLast( PID_COSMETIC_CASE );
+    pids.insertLast( PID_HYPODERMIC_NEEDLE );
+    pids.insertLast( PID_CYBERNETIC_BRAIN );
+    pids.insertLast( PID_HUMAN_BRAIN );
+    pids.insertLast( PID_CHIMP_BRAIN );
+    pids.insertLast( PID_ABNORMAL_BRAIN );
+    pids.insertLast( PID_DICE );
+    pids.insertLast( PID_LOADED_DICE );
+    pids.insertLast( PID_EASTER_EGG );
+    pids.insertLast( PID_MAGIC_8_BALL );
+    pids.insertLast( PID_MUTAGENIC_SYRUM );
+    pids.insertLast( PID_CATS_PAW_ISSUE_5 );
+    pids.insertLast( PID_HEART_PILLS );
+    pids.insertLast( PID_MOORE_BAD_BRIEFCASE );
+    pids.insertLast( PID_MOORE_GOOD_BRIEFCASE );
+    pids.insertLast( PID_LYNETTE_HOLO );
+    pids.insertLast( PID_WESTIN_HOLO );
+    pids.insertLast( PID_SPY_HOLO );
+    pids.insertLast( PID_DR_HENRY_PAPERS );
+    pids.insertLast( PID_PRESIDENTIAL_PASS );
+    pids.insertLast( PID_RANGER_PIN );
+    pids.insertLast( PID_RANGER_MAP );
+    pids.insertLast( PID_COMPUTER_VOICE_MODULE );
+    pids.insertLast( PID_ROBOT_MOTIVATOR );
+    pids.insertLast( PID_RNDQ_INTEL );
+    pids.insertLast( PID_V15_KEYCARD );
+    pids.insertLast( PID_V15_COMPUTER_PART );
+    pids.insertLast( PID_FIELD_MEDIC_KIT );
+    pids.insertLast( PID_PARAMEDICS_BAG );
+    pids.insertLast( PID_EXP_LOCKPICK_SET );
+    pids.insertLast( PID_ELEC_LOCKPICK_MKII );
+    pids.insertLast( PID_OIL_CAN );
+    pids.insertLast( PID_STABLES_ID_BADGE );
+    pids.insertLast( PID_VAULT_13_SHACK_KEY );
+    pids.insertLast( PID_SPECTACLES );
+    pids.insertLast( PID_EMPTY_JET );
+    pids.insertLast( PID_OXYGEN_TANK );
+    pids.insertLast( PID_POISON_TANK );
+    pids.insertLast( PID_MINE_PART );
+    pids.insertLast( PID_MORNING_STAR_MINE );
+    pids.insertLast( PID_EXCAVATOR_CHIP );
+    pids.insertLast( PID_STONE_HEAD );
+    pids.insertLast( PID_MEDICAL_SUPPLIES );
+    pids.insertLast( PID_GOLD_TOOTH );
+    pids.insertLast( PID_HOWITZER_SHELL );
+    pids.insertLast( PID_RAMIREZ_BOX_CLOSED );
+    pids.insertLast( PID_RAMIREZ_BOX_OPEN );
+    pids.insertLast( PID_MIRROR_SHADES );
+    pids.insertLast( PID_DECK_OF_CARDS );
+    pids.insertLast( PID_MARKED_DECK_OF_CARDS );
+    pids.insertLast( PID_TEMPLE_KEY );
+    pids.insertLast( PID_POCKET_LINT );
+    pids.insertLast( PID_BIO_GEL );
+    pids.insertLast( PID_BLONDIE_DOG_TAG );
+    pids.insertLast( PID_ANGEL_EYES_DOG_TAG );
+    pids.insertLast( PID_TUCO_DOG_TAG );
+    pids.insertLast( PID_RAIDERS_MAP );
+    pids.insertLast( PID_SHERIFF_BADGE );
+    pids.insertLast( PID_VERTIBIRD_PLANS );
+    pids.insertLast( PID_BISHOPS_HOLODISK );
+    pids.insertLast( PID_ACCOUNT_BOOK );
+    pids.insertLast( PID_BRAHMIN_SKIN );
+    pids.insertLast( PID_TORN_PAPER_1 );
+    pids.insertLast( PID_TORN_PAPER_2 );
+    pids.insertLast( PID_TORN_PAPER_3 );
+    pids.insertLast( PID_PASSWORD_PAPER );
+    pids.insertLast( PID_EXPLOSIVE_SWITCH );
+    pids.insertLast( PID_ELRON_FIELD_REP );
+    pids.insertLast( PID_ENCLAVE_HOLODISK_5 );
+    pids.insertLast( PID_ENCLAVE_HOLODISK_1 );
+    pids.insertLast( PID_ENCLAVE_HOLODISK_2 );
+    pids.insertLast( PID_ENCLAVE_HOLODISK_3 );
+    pids.insertLast( PID_ENCLAVE_HOLODISK_4 );
+    pids.insertLast( PID_EVACUATION_HOLODISK );
+    pids.insertLast( PID_EXPERIMENT_HOLODISK );
+    pids.insertLast( PID_MEDICAL_HOLODISK );
+    pids.insertLast( PID_PASSWORD_HOLODISK );
+    pids.insertLast( PID_SMITTY_MEAL );
+    pids.insertLast( PID_BALL_GAG );
+    pids.insertLast( PID_BECKY_BOOK );
+    pids.insertLast( PID_ELRON_MEMBER_HOLO );
+    pids.insertLast( PID_DAISIES );
+    pids.insertLast( PID_METAL_TRASH );
+    pids.insertLast( PID_ENLIGHTENED_ONE_LETTER );
+    pids.insertLast( PID_BROADCAST_HOLODISK );
+    pids.insertLast( PID_SIERRA_MISSION_HOLODISK );
+    pids.insertLast( PID_NAVCOM_PARTS );
+    pids.insertLast( PID_FALLOUT_2_HINTBOOK );
+    pids.insertLast( PID_PLAYERS_EAR );
+    pids.insertLast( PID_RNDQ_HVT_EAR );
+    pids.insertLast( PID_MEMO );
+    pids.insertLast( PID_K9_MOTIVATOR );
+    pids.insertLast( PID_NCR_HISTORY_HOLODISK );
+    pids.insertLast( PID_MR_NIXON_DOLL );
+    pids.insertLast( PID_TANKER_FOB );
+    pids.insertLast( PID_ELRON_TEACH_HOLO );
+    pids.insertLast( PID_KOKOWEEF_MINE_SCRIP );
+    pids.insertLast( PID_PRES_ACCESS_KEY );
+    pids.insertLast( PID_DERMAL_PIP_BOY_DISK );
+    pids.insertLast( PID_MEM_CHIP_BLUE );
+    pids.insertLast( PID_MEM_CHIP_GREEN );
+    pids.insertLast( PID_MEM_CHIP_RED );
+    pids.insertLast( PID_MEM_CHIP_YELLOW );
+    pids.insertLast( PID_DECOMPOSING_BODY );
+    pids.insertLast( PID_BLOW_UP_DOLL );
+    pids.insertLast( PID_POPPED_BLOW_UP_DOLL );
+    pids.insertLast( PID_PIP_BOY_MEDICAL_ENHANCER );
+    pids.insertLast( PID_REAL_BOTTLE_CAPS );
+    pids.insertLast( PID_MAP );
+    pids.insertLast( PID_BOTTLE_EMPTY );
+    pids.insertLast( PID_BOTTLE_FULL );
+    pids.insertLast( PID_PART_OF_ROPE );
+    pids.insertLast( PID_GUNPOWDER );
+    pids.insertLast( PID_METAL_ORE );
+    pids.insertLast( PID_MINERAL );
+    pids.insertLast( PID_TUBE );
+    pids.insertLast( PID_MEAT );
+    pids.insertLast( PID_MOUSE_SKIN );
+    pids.insertLast( PID_CIGARETTES );
+    pids.insertLast( PID_BOTTLE_GLASS );
+    pids.insertLast( PID_AXE );
+    pids.insertLast( PID_MINE );
+    pids.insertLast( PID_CHOSEN_HOLO );
+    pids.insertLast( PID_CHOSEN_HOLO_DECODED );
+    pids.insertLast( PID_LETTER_TO_LIN );
+    pids.insertLast( PID_LETTER_TO_TODD );
+    pids.insertLast( PID_EDWARD_REPORT );
+    pids.insertLast( PID_LETTER_TO_SINDY );
+    pids.insertLast( PID_LETTER_TO_CASSIDY );
+    pids.insertLast( PID_FIRE_GECKO_PELT );
+    pids.insertLast( PID_DANTON_POISON );
+    pids.insertLast( PID_ARROYO_SYRINGE );
+    pids.insertLast( PID_DEATH_STAR_PLANS );
+    pids.insertLast( PID_FALLOUT_3_HOLO );
+    pids.insertLast( PID_FAKE_GECK );
+    pids.insertLast( PID_USED_GECK );
+    pids.insertLast( PID_WELDING );
+    pids.insertLast( PID_WELDING_USED );
+    pids.insertLast( PID_RAGS );
+    pids.insertLast( PID_NITROGLYCERIN );
+    pids.insertLast( PID_CHEMICALS );
+    pids.insertLast( PID_TNT );
+    pids.insertLast( PID_HEXOGEN );
+    pids.insertLast( PID_PLASTIC_EXPLOSIVES_DULL );
+    pids.insertLast( PID_SANDBAG_EMPTY );
+    TabSetItemPids( TAB_CUSTOM4, "001 - Misc", pids );
+
+    pids.resize( 0 );
+    pids.insertLast( PID_EB_LONG_HOR );
+    pids.insertLast( PID_EB_LONG_VERT );
+    pids.insertLast( PID_EB_BLOCKER );
+    pids.insertLast( PID_ENERGY_BARIER_ACCESS_CARD );
+    pids.insertLast( PID_EB_TRIGGER );
+    pids.insertLast( PID_EB_SHORT_HOR1 );
+    pids.insertLast( PID_EB_SHORT_VERT1 );
+    pids.insertLast( PID_EB_SHORT_HOR1_RED );
+    pids.insertLast( PID_EB_SHORT_VERT1_RED );
+    pids.insertLast( PID_EB_SHORT_HOR2 );
+    pids.insertLast( PID_EB_SHORT_VERT2 );
+    pids.insertLast( PID_EB_SHORT_HOR2_RED );
+    pids.insertLast( PID_EB_SHORT_VERT2_RED );
+    pids.insertLast( PID_EB_SHORT_HOR3 );
+    pids.insertLast( PID_EB_SHORT_VERT3 );
+    pids.insertLast( PID_EB_SHORT_HOR3_RED );
+    pids.insertLast( PID_EB_SHORT_VERT3_RED );
+    pids.insertLast( PID_EB_EMITTER_HOR1 );
+    pids.insertLast( PID_EB_EMITTER_VERT1 );
+    pids.insertLast( PID_EB_EMITTER_HOR2 );
+    pids.insertLast( PID_EB_EMITTER_VERT2 );
+    pids.insertLast( PID_EB_EMITTER_HOR3 );
+    pids.insertLast( PID_EB_EMITTER_VERT3 );
+    TabSetItemPids( TAB_CUSTOM4, "002 - E. barriers", pids );
+
+    TabSetName( TAB_CUSTOM4, "Msc" );
+
+    // MSC2 TAB
+    TabDelete( TAB_CUSTOM5 );
+    // Key
+    pids.resize( 0 );
+    pids.insertLast( PID_KEY );
+    pids.insertLast( PID_KEYS );
+    pids.insertLast( PID_RED_PASS_KEY );
+    pids.insertLast( PID_BLUE_PASS_KEY );
+    pids.insertLast( PID_NUKE_KEY );
+    pids.insertLast( PID_YELLOW_PASS_KEY );
+    pids.insertLast( PID_TEMPLE_KEY );
+    pids.insertLast( PID_JAIL_KEY );
+    TabSetItemPids( TAB_CUSTOM5, "001 - keys", pids );
+
+    // Msc2 items
+    pids.resize( 0 );
+    pids.insertLast( PID_GEIGER_COUNTER );
+    pids.insertLast( PID_HOLODISK );
+    pids.insertLast( PID_RADIO );
+    pids.insertLast( PID_ACTIVE_DYNAMITE );
+    pids.insertLast( PID_ACTIVE_PLASTIC_EXPLOSIVE );
+    pids.insertLast( PID_TOGGLE_SWITCH );
+    pids.insertLast( PID_MEMO );
+    pids.insertLast( PID_MAP );
+    pids.insertLast( PID_ACTIVE_MINE );
+    pids.insertLast( PID_POSTMAN_LETTER );
+    pids.insertLast( PID_CHOSEN_HOLO );
+    pids.insertLast( PID_CHOSEN_HOLO_DECODED );
+    pids.insertLast( PID_LETTER_TO_LIN );
+    pids.insertLast( PID_LETTER_TO_TODD );
+    pids.insertLast( PID_EDWARD_REPORT );
+    pids.insertLast( PID_LETTER_TO_SINDY );
+    pids.insertLast( PID_LETTER_TO_CASSIDY );
+    pids.insertLast( PID_HUBOLOGIST_BOOK );
+    pids.insertLast( PID_REBEL_TAG );
+    pids.insertLast( PID_SANDBAG_1 );
+    pids.insertLast( PID_SANDBAG_2 );
+    pids.insertLast( PID_SANDBAG_3 );
+    pids.insertLast( PID_SANDBAG_4 );
+    pids.insertLast( PID_SANDBAG_5 );
+    pids.insertLast( PID_KOTW_BEER );
+    pids.insertLast( PID_CHITIN_ARMOR_RECIPE );
+    pids.insertLast( PID_FAKE_LETTER );
+    TabSetItemPids( TAB_CUSTOM5, "002 - Msc2", pids );
+
+    // Cars
+    pids.resize( 0 );
+    pids.insertLast( PID_BUGGY );
+    pids.insertLast( PID_BUGGY_BAG );
+    pids.insertLast( PID_SCOUT );
+    pids.insertLast( PID_SCOUT_BAG );
+    pids.insertLast( PID_HUMMER );
+    pids.insertLast( PID_HUMMER_BAG );
+    pids.insertLast( PID_HIGHWAYMAN );
+    pids.insertLast( PID_HIGHWAYMAN_BAG );
+    pids.insertLast( PID_VERTIBIRD );
+    pids.insertLast( PID_VERTIBIRD_BAG );
+    pids.insertLast( PID_BOAT );
+    pids.insertLast( PID_BOAT_BAG );
+    TabSetItemPids( TAB_CUSTOM5, "003 - cars", pids );
+
+    // Etc.
+    pids.resize( 0 );
+    pids.insertLast( 3228 );
+    TabSetItemPids( TAB_CUSTOM5, "004 - etc.", pids );
+    TabSetName( TAB_CUSTOM5, "Msc2" );
+
+    // CONTAINERS AND DOORS TAB
+    TabDelete( TAB_CUSTOM6 );
+
+    // Containers
+    pids.resize( 0 );
+    pids.insertLast( PID_FRIDGE );
+    pids.insertLast( PID_ICE_CHEST_LEFT );
+    pids.insertLast( PID_ICE_CHEST_RIGHT );
+    pids.insertLast( PID_BOOKCASE_0 );
+    pids.insertLast( PID_BOOKCASE_1 );
+    pids.insertLast( PID_BOOKCASE_2 );
+    pids.insertLast( PID_BOOKCASE_3 );
+    pids.insertLast( PID_BOOKCASE_4 );
+    pids.insertLast( PID_BOOKCASE_5 );
+    pids.insertLast( PID_DESK_0 );
+    pids.insertLast( PID_DESK_1 );
+    pids.insertLast( PID_DRESSER_0 );
+    pids.insertLast( PID_DRESSER_1 );
+    pids.insertLast( PID_DRESSER_2 );
+    pids.insertLast( PID_BACKPACK );
+    pids.insertLast( PID_BROWN_BAG );
+    pids.insertLast( PID_ALIEN_SIDE );
+    pids.insertLast( PID_ALIEN_FORWARD );
+    pids.insertLast( PID_FOOTLOCKER_CLEAN_LEFT );
+    pids.insertLast( PID_FOOTLOCKER_RUSTY_LEFT );
+    pids.insertLast( PID_FOOTLOCKER_CLEAN_RIGHT );
+    pids.insertLast( PID_FOOTLOCKER_RUSTY_RIGHT );
+    pids.insertLast( PID_LOCKER_CLEAN_LEFT );
+    pids.insertLast( PID_LOCKER_RUSTY_LEFT );
+    pids.insertLast( PID_LOCKER_CLEAN_RIGHT );
+    pids.insertLast( PID_LOCKER_RUSTY_RIGHT );
+    pids.insertLast( PID_WALL_LOCKER_CLEAN_LEFT );
+    pids.insertLast( PID_WALL_LOCKER_CLEAN_RIGHT );
+    pids.insertLast( PID_WALL_LOCKER_RUSTY_LEFT );
+    pids.insertLast( PID_WALL_LOCKER_RUSTY_RIGHT );
+    pids.insertLast( PID_BOOKSELF_0 );
+    pids.insertLast( PID_BOOKSELF_1 );
+    pids.insertLast( PID_BOOKSELF_2 );
+    pids.insertLast( PID_MISC_BOOKCASE_0 );
+    pids.insertLast( PID_BOOKSELF_3 );
+    pids.insertLast( PID_MISC_BOOKCASE_1 );
+    pids.insertLast( PID_SHELVES_0 );
+    pids.insertLast( PID_SHELVES_1 );
+    pids.insertLast( PID_SHELVES_2 );
+    pids.insertLast( PID_MISC_SHELVES_0 );
+    pids.insertLast( PID_SHELVES_3 );
+    pids.insertLast( PID_MISC_SHELVES_1 );
+    pids.insertLast( PID_WORKBENCH );
+    pids.insertLast( PID_TOOL_BOARD );
+    pids.insertLast( PID_IGUANA_STAND );
+    pids.insertLast( PID_TABLE_0 );
+    pids.insertLast( PID_TABLE_1 );
+    pids.insertLast( PID_STUFF_0 );
+    pids.insertLast( PID_STUFF_1 );
+    pids.insertLast( PID_STUFF_2 );
+    pids.insertLast( PID_STUFF_3 );
+    pids.insertLast( PID_STUFF_4 );
+    pids.insertLast( PID_STUFF_5 );
+    pids.insertLast( PID_STUFF_6 );
+    pids.insertLast( PID_STUFF_7 );
+    pids.insertLast( PID_STUFF_8 );
+    pids.insertLast( PID_STUFF_9 );
+    pids.insertLast( PID_STUFF_10 );
+    pids.insertLast( PID_STUFF_11 );
+    pids.insertLast( PID_CONTAINER_WOOD_CRATE );
+    pids.insertLast( PID_DESK_3 );
+    pids.insertLast( PID_DESK_4 );
+    pids.insertLast( PID_DESK_5 );
+    pids.insertLast( PID_DESK_6 );
+    pids.insertLast( PID_DESK_7 );
+    pids.insertLast( PID_DESK_8 );
+    pids.insertLast( PID_DESK_9 );
+    pids.insertLast( PID_LOCKER_7 );
+    pids.insertLast( PID_LOCKER_8 );
+    pids.insertLast( PID_BOX_0 );
+    pids.insertLast( PID_BOX_1 );
+    pids.insertLast( PID_BOX_2 );
+    pids.insertLast( PID_BOX_3 );
+    pids.insertLast( PID_BOX_4 );
+    pids.insertLast( PID_BOX_5 );
+    pids.insertLast( PID_BOX_6 );
+    pids.insertLast( PID_BOX_7 );
+    pids.insertLast( PID_VAULT_DWELLER_BONES );
+    pids.insertLast( PID_REMAINSOF_GIZMO );
+    pids.insertLast( PID_DESK_10 );
+    pids.insertLast( PID_SMALL_POT );
+    pids.insertLast( PID_TALL_POT );
+    pids.insertLast( PID_CHEST );
+    pids.insertLast( PID_LEFT_ARROYO_BOOKCASE );
+    pids.insertLast( PID_RIGHT_ARROYO_BOOKCASE );
+    pids.insertLast( PID_OLIVE_POT );
+    pids.insertLast( PID_FLOWER_POT );
+    pids.insertLast( PID_HUMAN_BONES );
+    pids.insertLast( PID_CRASHED_VERTI_BIRD );
+    pids.insertLast( PID_GRAVESITE_1 );
+    pids.insertLast( PID_GRAVESITE_2 );
+    pids.insertLast( PID_GRAVESITE_3 );
+    pids.insertLast( PID_GRAVESITE_4 );
+    pids.insertLast( PID_LG_LT_AMMO_CRATE );
+    pids.insertLast( PID_SM_LT_AMMO_CRATE );
+    pids.insertLast( PID_LG_RT_AMMO_CRATE );
+    pids.insertLast( PID_SM_RT_AMMO_CRATE );
+    pids.insertLast( PID_LF_GRAVESITE_1 );
+    pids.insertLast( PID_LF_GRAVESITE_2 );
+    pids.insertLast( PID_LF_GRAVESITE_3 );
+    pids.insertLast( PID_STONE_HEAD );
+    pids.insertLast( PID_WAGON_RED );
+    pids.insertLast( PID_WAGON_GREY );
+    pids.insertLast( PID_CAR_TRUNK );
+    pids.insertLast( PID_HIDDEN_CONTAINER );
+    pids.insertLast( PID_WALL_SAFE );
+    pids.insertLast( PID_FLOOR_SAFE );
+    pids.insertLast( PID_POOL_TABLE_1 );
+    pids.insertLast( PID_POOL_TABLE_2 );
+    pids.insertLast( PID_POOL_TABLE_3 );
+    pids.insertLast( PID_POOL_TABLE_4 );
+    pids.insertLast( PID_POOL_TABLE_5 );
+    pids.insertLast( PID_POOL_TABLE_6 );
+    pids.insertLast( PID_POOR_BOX );
+    pids.insertLast( PID_DEAD_REDSHIRT_0 );
+    pids.insertLast( PID_DEAD_REDSHIRT_1 );
+    pids.insertLast( PID_DEAD_REDSHIRT_2 );
+    pids.insertLast( PID_MINING_MACHINE );
+    TabSetItemPids( TAB_CUSTOM6, "001 - Containers", pids );
+
+    // Door
+    pids.resize( 0 );
+    pids.insertLast( 2002 );
+    pids.insertLast( 2008 );
+    pids.insertLast( 2018 );
+    pids.insertLast( 2019 );
+    pids.insertLast( 2022 );
+    pids.insertLast( 2023 );
+    pids.insertLast( 2077 );
+    pids.insertLast( 2087 );
+    pids.insertLast( 2088 );
+    pids.insertLast( 2089 );
+    pids.insertLast( 2142 );
+    pids.insertLast( 2143 );
+    pids.insertLast( 2144 );
+    pids.insertLast( 2151 );
+    pids.insertLast( 2153 );
+    pids.insertLast( 2154 );
+    pids.insertLast( 2173 );
+    pids.insertLast( 2195 );
+    pids.insertLast( 2196 );
+    pids.insertLast( 2258 );
+    pids.insertLast( 2259 );
+    pids.insertLast( 2260 );
+    pids.insertLast( 2261 );
+    pids.insertLast( 2332 );
+    pids.insertLast( 2333 );
+    pids.insertLast( 2346 );
+    pids.insertLast( 2361 );
+    pids.insertLast( 2362 );
+    pids.insertLast( 2406 );
+    pids.insertLast( 2421 );
+    pids.insertLast( 2437 );
+    pids.insertLast( 2438 );
+    pids.insertLast( 2448 );
+    pids.insertLast( 2470 );
+    pids.insertLast( 2481 );
+    pids.insertLast( 2482 );
+    pids.insertLast( 2486 );
+    pids.insertLast( 2581 );
+    pids.insertLast( 2645 );
+    pids.insertLast( 2825 );
+    pids.insertLast( 2826 );
+    pids.insertLast( 2848 );
+    pids.insertLast( 2849 );
+    pids.insertLast( 2850 );
+    pids.insertLast( 2934 );
+    for( uint i = 2954; i <= 2962; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 2978 );
+    pids.insertLast( 2981 );
+    pids.insertLast( 2982 );
+    pids.insertLast( 2983 );
+    pids.insertLast( 2984 );
+    pids.insertLast( 2995 );
+    pids.insertLast( 3159 );
+    pids.insertLast( 3160 );
+    pids.insertLast( 3169 );
+    pids.insertLast( 3170 );
+    pids.insertLast( 3337 );
+    pids.insertLast( 3338 );
+    pids.insertLast( 3358 );
+    for( uint i = 3387; i <= 3392; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 3417 );
+    pids.insertLast( 3418 );
+    pids.insertLast( 3434 );
+    pids.insertLast( 3435 );
+    pids.insertLast( 3449 );
+    pids.insertLast( 3466 );
+    pids.insertLast( 3467 );
+    pids.insertLast( 3479 );
+    pids.insertLast( 3480 );
+    pids.insertLast( 3491 );
+    pids.insertLast( 3492 );
+    for( uint i = 3531; i <= 3536; i++ )
+        pids.insertLast( i );
+    for( uint i = 3573; i <= 3576; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 3709 );
+    pids.insertLast( 3710 );
+    pids.insertLast( 3745 );
+    pids.insertLast( 3748 );
+    pids.insertLast( 3818 );
+    pids.insertLast( 3819 );
+    for( uint i = 3900; i <= 3904; i++ )
+        pids.insertLast( i );
+    for( uint i = 4757; i <= 4769; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM6, "002 - Doors", pids );
+
+    TabSetName( TAB_CUSTOM6, "C/D" );
+
+    // GRIDS TAB
+    TabDelete( TAB_CUSTOM7 );
+
+    // Scenery
+    pids.resize( 0 );
+	pids.insertLast( 1710 );
+    pids.insertLast( 2049 );
+    pids.insertLast( 2068 );
+    pids.insertLast( 2139 );
+    pids.insertLast( 2140 );
+    pids.insertLast( 2197 );
+    for( uint i = 2348; i <= 2356; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 2583 );
+    pids.insertLast( 2584 );
+    pids.insertLast( 2977 );
+    pids.insertLast( 3293 );
+    pids.insertLast( 3297 );
+    pids.insertLast( 3298 );
+    pids.insertLast( 3645 );
+    pids.insertLast( 3647 );
+    pids.insertLast( 3648 );
+    pids.insertLast( 3655 );
+    pids.insertLast( 3660 );
+    pids.insertLast( 3685 );
+    pids.insertLast( 3835 );
+    pids.insertLast( 3853 );
+    TabSetItemPids( TAB_CUSTOM7, "001 - ladders", pids );
+
+    // Grids
+    pids.resize( 0 );
+    for( uint i = 4016; i <= 4023; i++ )
+        pids.insertLast( i );
+    for( uint i = 4031; i <= 4046; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM7, "002 - exit grids", pids );
+    TabSetName( TAB_CUSTOM7, "Grd" );
+
+    // GENERIC SCENERY TAB
+    TabDelete( TAB_CUSTOM8 );
+
+    pids.resize( 0 );
+    pids.insertLast( 2001 );
+    for( uint i = 2003; i <= 2007; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "000 - City Jink 1", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2009; i <= 2017; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 2020 );
+    pids.insertLast( 2021 );
+    for( uint i = 2024; i <= 2048; i++ )
+        pids.insertLast( i );
+    for( uint i = 2050; i <= 2062; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "001 - Vault 13", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2063; i <= 2066; i++ )
+        pids.insertLast( i );
+    for( uint i = 2069; i <= 2076; i++ )
+        pids.insertLast( i );
+    for( uint i = 2078; i <= 2086; i++ )
+        pids.insertLast( i );
+    for( uint i = 2090; i <= 2093; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "002 - Stones and misc", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2094; i <= 2127; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "003 - Junktown", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2129; i <= 2138; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "004 - Necro sewer", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2145; i <= 2150; i++ )
+        pids.insertLast( i );
+    for( uint i = 2155; i <= 2172; i++ )
+        pids.insertLast( i );
+    for( uint i = 2174; i <= 2193; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "005 - Bro&Vault", pids );
+
+    pids.resize( 0 );
+    pids.insertLast( 2194 );
+    for( uint i = 2198; i <= 2257; i++ )
+        pids.insertLast( i );
+    for( uint i = 2262; i <= 2331; i++ )
+        pids.insertLast( i );
+    for( uint i = 2334; i <= 2343; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "006 - Necro city", pids );
+
+    pids.resize( 0 );
+    pids.insertLast( 2345 );
+    pids.insertLast( 2347 );
+    for( uint i = 2357; i <= 2360; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "007 - Cathedral", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2363; i <= 2383; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "008 - S. Sands", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2384; i <= 2405; i++ )
+        pids.insertLast( i );
+    for( uint i = 2407; i <= 2420; i++ )
+        pids.insertLast( i );
+    for( uint i = 2422; i <= 2423; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "009 - Tents&Indstr", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2425; i <= 2436; i++ )
+        pids.insertLast( i );
+    for( uint i = 2439; i <= 2447; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 2449 );
+    TabSetItemPids( TAB_CUSTOM8, "010 - M.base/Cath", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2450; i <= 2466; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "011 - Gamble", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2467; i <= 2469; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "012 - Old elev.", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2471; i <= 2480; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "013 - Warehouse", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2483; i <= 2485; i++ )
+        pids.insertLast( i );
+    for( uint i = 2487; i <= 2508; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "014 - Pray@Follow", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2509; i <= 2515; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "015 - Crrap", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2516; i <= 2526; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "016 - Bro Elders", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2527; i <= 2532; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "017 - Carts", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2533; i <= 2543; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "018 - Bro sport", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2544; i <= 2580; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 2582 );
+    for( uint i = 2585; i <= 2590; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "019 - Ind,Bro,Cath", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2591; i <= 2644; i++ )
+        pids.insertLast( i );
+    for( uint i = 2646; i <= 2685; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "020 - In&Out", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2686; i <= 2696; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "021 - Cliffs", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2697; i <= 2824; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "022 - Master", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2827; i <= 2847; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "023 - Robo", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2851; i <= 2900; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "024 - Signs", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2901; i <= 2908; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "025 - Robo2", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2909; i <= 2933; i++ )
+        pids.insertLast( i );
+    for( uint i = 2935; i <= 2953; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "026 - Arroyo", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2963; i <= 2975; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "027 - Klamath", pids );
+
+    pids.resize( 0 );
+    for( uint i = 2979; i <= 2980; i++ )
+        pids.insertLast( i );
+    for( uint i = 2985; i <= 2994; i++ )
+        pids.insertLast( i );
+    for( uint i = 2996; i <= 3018; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "028 - Gecko&Ind", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3019; i <= 3141; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 3448 );
+    TabSetItemPids( TAB_CUSTOM8, "029 - Reno", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3142; i <= 3158; i++ )
+        pids.insertLast( i );
+    for( uint i = 3161; i <= 3168; i++ )
+        pids.insertLast( i );
+    for( uint i = 3171; i <= 3191; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "030 - Indstr", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3192; i <= 3215; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "031 - Cav&Wall", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3216; i <= 3227; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "032 - Bodies", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3230; i <= 3236; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "033 - Sierra", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3237; i <= 3253; i++ )
+        pids.insertLast( i );
+    for( uint i = 3294; i <= 3296; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "034 - Grvs&Grss", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3254; i <= 3273; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "035 - NCR", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3274; i <= 3292; i++ )
+        pids.insertLast( i );
+    for( uint i = 3305; i <= 3320; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "036 - Beams", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3299; i <= 3304; i++ )
+        pids.insertLast( i );
+    for( uint i = 3321; i <= 3329; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "037 - Gore", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3330; i <= 3336; i++ )
+        pids.insertLast( i );
+    for( uint i = 3338; i <= 3357; i++ )
+        pids.insertLast( i );
+    for( uint i = 3359; i <= 3379; i++ )
+        pids.insertLast( i );
+    for( uint i = 3468; i <= 3472; i++ )
+        pids.insertLast( i );
+    for( uint i = 3706; i <= 3708; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "038 - Bulk", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3380; i <= 3386; i++ )
+        pids.insertLast( i );
+    for( uint i = 3436; i <= 3447; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "039 - VCity", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3393; i <= 3416; i++ )
+        pids.insertLast( i );
+    for( uint i = 3419; i <= 3432; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "040 - Signs", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3473; i <= 3478; i++ )
+        pids.insertLast( i );
+    for( uint i = 3481; i <= 3490; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "041 - Reno Bulk", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3493; i <= 3530; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 3537 );
+    for( uint i = 3636; i <= 3644; i++ )
+        pids.insertLast( i );
+    for( uint i = 3649; i <= 3651; i++ )
+        pids.insertLast( i );
+    for( uint i = 3746; i <= 3747; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "042 - Enclave", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3450; i <= 3465; i++ )
+        pids.insertLast( i );
+    for( uint i = 3538; i <= 3572; i++ )
+        pids.insertLast( i );
+    for( uint i = 3577; i <= 3599; i++ )
+        pids.insertLast( i );
+    for( uint i = 3609; i <= 3619; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "043 - Frisco", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3600; i <= 3608; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "044 - Temple&Ant", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3620; i <= 3635; i++ )
+        pids.insertLast( i );
+    for( uint i = 3652; i <= 3654; i++ )
+        pids.insertLast( i );
+    pids.insertLast( 3656 );
+    for( uint i = 3684; i <= 3687; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "045 - Mining", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3657; i <= 3659; i++ )
+        pids.insertLast( i );
+    for( uint i = 3661; i <= 3683; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "046 - NCR", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3688; i <= 3705; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "047 - Vertywhat?", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3711; i <= 3720; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "048 - Tanker", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3721; i <= 3736; i++ )
+        pids.insertLast( i );
+    for( uint i = 3737; i <= 3744; i++ )
+        pids.insertLast( i );
+    for( uint i = 3749; i <= 3755; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "049 - Greece", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3756; i <= 3792; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "050 - Moar Bulk ", pids );
+
+    pids.resize( 0 );
+    for( uint i = 3793; i <= 3817; i++ )
+        pids.insertLast( i );
+    for( uint i = 3820; i <= 3834; i++ )
+        pids.insertLast( i );
+    for( uint i = 3836; i <= 3852; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "051 - Colored stuff", pids );
+
+    pids.resize( 0 );
+    for( uint i = 4001; i <= 4010; i++ )
+        pids.insertLast( i );
+    for( uint i = 4013; i <= 4015; i++ )
+        pids.insertLast( i );
+    for( uint i = 4024; i <= 4030; i++ )
+        pids.insertLast( i );
+    for( uint i = 4047; i <= 4060; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "052 - Effects", pids );
+
+    pids.resize( 0 );
+    for( uint i = 4277; i <= 4282; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "053 - Craft", pids );
+
+    pids.resize( 0 );
+    for( uint i = 4500; i <= 4590; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "054 - Tactics", pids );
+
+    pids.resize( 0 );
+    for( uint i = 4594; i <= 4611; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "055 - Fallout:BGE", pids );
+
+    pids.resize( 0 );
+    for( uint i = 4612; i <= 4657; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "056 - Hell", pids );
+
+    pids.resize( 0 );
+    for( uint i = 4667; i <= 4756; i++ )
+        pids.insertLast( i );
+    for( uint i = 4770; i <= 4999; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM8, "FOnline latest", pids );
+
+    TabSetName( TAB_CUSTOM8, "Gen" );
+
+    // WALLS TAB
+    TabDelete( TAB_CUSTOM9 );
+    pids.resize( 0 );
+    for( uint i = 5000; i <= 9999; i++ )
+        pids.insertLast( i );
+    TabSetItemPids( TAB_CUSTOM9, "001 - Vault 13", pids );
+    TabSetName( TAB_CUSTOM9, "Wall" );
+
+    // Tactics tiles, tiles_0.bos
+    if( __GeometryType == GEOMETRY_TACTICS )
+    {
+        TabSetName( TAB_CUSTOM0, "TacT" );
+        string@[] ftTiles = { "tiles/" };
+        bool[] includeSubdirs = { true };
+        TabSetTileDirs( TAB_CUSTOM0, ftTiles, includeSubdirs );
+    }
+
+    // Arcanum tiles, arcanum2.dat
+    if( __GeometryType == GEOMETRY_ARCANUM )
+    {
+        TabSetName( TAB_CUSTOM0, "ArcT" );
+        string@[] arcanumTiles = { "art/tile/" };
+        bool[] includeSubdirs = { true };
+        TabSetTileDirs( TAB_CUSTOM0, arcanumTiles, includeSubdirs );
+    }
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Main loop function. Returned time of next call in milliseconds.
+uint loop()
+{
+    return 60000;
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Call on console message. Return true to disable engine processing.
+bool console_message( string& message )
+{
+    // Command prefixes
+    // ~ load map
+    // ^ save map
+    // @ critter animation
+    // # run script
+    // * other
+    return false;
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Render interface function. You can use Draw* functions only there.
+// Layer specification:
+//    0
+// Game map
+//    1
+// Mapper interface
+//    2
+// Console, Messbox
+//    3
+// Mapper object interface
+//    4
+// Cursor
+//    5
+uint PathSpriteId = 0;
+void render_iface( uint layer )
+{
+
+	switch(layer)
+	{
+		case 4:
+		{
+			DrawMap();
+			array<int> drawDat;
+			array<MapperObject@> objects;
+			for(uint i =0, l= GetSelectedObjects(objects); i < l; i++)
+			{
+				drawDat.insertLast(objects[i].MapX);
+				drawDat.insertLast(objects[i].MapY);
+				drawDat.insertLast(0xFF00FF00);
+			}
+			
+			DrawPrimitive(DRAW_PRIMITIVE_POINTLIST, drawDat);
+
+            if (objects.length() == 1 && objects[0].UserData0 < PrefabList.length())
+            {
+                string str = PrefabList[objects[0].UserData0].Dump();
+                DrawText(str, __MouseX + 12 ,__MouseY + 30 ,	__ScreenWidth , __ScreenHeight, 0xFFFFFFFF, FONT_FALLOUT, 0);
+            }
+			break;
+		}
+		case 5:
+			if (BlocklinesMode && valid(_ActiveObject))
+			{
+				uint16 ox=0,oy=0;
+				
+				GetMonitorHex(__MouseX,__MouseY,ox,oy);
+				uint dist = GetDistantion(ox,oy, BlocklinesLastX, BlocklinesLastY);
+				for (uint i = 0; i < dist ; i++)
+				{
+					uint16 x=ox,y=oy;
+					GetHexCoord(BlocklinesLastX, BlocklinesLastY, x,y, 0.0f, i);
+					int mx = 0, my= 0;
+					GetHexPos(x,y, mx,my);
+					DrawSprite(PathSpriteId,0, mx, my, 0xFFFFFFFF);
+				}				
+			}
+
+			
+			/*if (valid(_ActiveObject))
+			{
+				DrawText("Draw Mode" + _PaintMode, __MouseX + 12 ,__MouseY ,	__ScreenWidth , __ScreenHeight, 0xFFFFFFFF, FONT_FALLOUT, 0);
+				DrawSprite( LoadSprite(_ActiveObject.get_PicMap(), 0 ) , -1 , __MouseX + 12  , __MouseY + 12 , 0 );
+			}*/
+			break;
+		default:
+			break;
+	}
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Render map function. You can use DrawMap* functions only there. This drawing before 1 iface layer.
+void render_map()
+{
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Mouse behaviours. Click states look in _client_defines.fos, Mouse click states.
+// Return true to disable engine events.
+int _PaintMode = 0;
+int _MouseMode = 0;
+bool _Draw = false;
+bool _Erase = false;
+bool mouse_down( int click )
+{
+	
+	
+    return false;
+}
+
+bool mouse_up( int click )
+{
+
+	if (BlocklinesMode)
+	{
+		uint16 ox=0,oy=0;
+		GetMonitorHex(__MouseX,__MouseY,ox,oy);
+		BlocklinesLastX =  ox;
+		BlocklinesLastY =  oy;
+	}
+
+    return false;
+}
+
+int BlocklinesLastX = 0;
+int BlocklinesLastY = 0;
+void mouse_move( int x, int y )
+{
+	if (BlocklinesMode)
+	{
+
+	}
+
+	if (_Draw)
+		PaintDraw();
+	else if (_Erase)
+		PaintErase();	
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Keyboard behaviours. Key codes look in _mapper_defines.fos DirectInput keyboard scan codes.
+// Return true to disable engine events.
+bool key_down( uint8 key, string& keyText )
+{
+
+	//if (key == DIK_W)
+	//{
+	//	_Draw = true;
+	//}
+	//else if (key == DIK_E)
+	//{
+	//	_Erase = true;
+	//}
+    return false;
+}
+
+bool key_up( uint8 key, string& keyText )
+{
+	if (BlocklinesMode)
+	{
+		if (key == DIK_Q)
+		{
+			@_ActiveObject = GetSelectedObject();
+			uint16 ox=0,oy=0;
+			GetMonitorHex(__MouseX,__MouseY,ox,oy);
+			BlocklinesLastX =  ox;
+			BlocklinesLastY =  oy;
+		}
+	}
+	//if (key == DIK_W)
+	//{
+	//	_Draw = false;
+	//}
+	//else if (key == DIK_E)
+	//{
+	//	_Erase = false;
+	//}
+	//else if (key == DIK_Q)
+	//{
+	//	@_ActiveObject = GetSelectedObject();
+	//}
+	//else if (key == DIK_F)
+	//{
+	//	uint16 ox=0,oy=0;
+	//	GetMonitorHex(__MouseX,__MouseY,ox,oy);
+	//	Fill(ox,oy);
+	//}
+    return false;
+}
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Called on mouse/keyboard input lost (alt-tab, minimize, lost focus).
+void input_lost()
+{}
+
+
+
+// //////////////////////////////////////////////////////////////////////////////////////////////////
+// Some useful functions.
+// #ConvertMaps
+// #ClearTiles
+// #MapTime         value
+// #MapNoLogOut     value
+// #MapScriptModule moduleName
+// #MapScriptFunc   funcName
+
+MapperMap@ GetActiveMap()
+{
+    array<MapperMap@> maps;
+    int cur = GetLoadedMaps( maps );
+    if( cur == -1 )
+        return null;
+    return maps[ cur ];
+}
+
+// Maps convertation to text format
+string ConvertMaps( string str )
+{
+    array<string@> mapNames;
+    GetMapFileNames( null, mapNames );
+
+    uint success = 0;
+    uint fail = 0;
+    for( uint i = 0; i < mapNames.length(); i++ )
+    {
+        MapperMap@ map = LoadMap( mapNames[ i ], PT_SERVER_MAPS );
+        if( !(map is null) )
+        {
+            if( SaveMap( map, mapNames[ i ], PT_SERVER_MAPS ) )
+            {
+                success++;
+            }
+            else
+            {
+                Message( "Fail to save " + mapNames[ i ] );
+                fail++;
+            }
+
+            UnloadMap( map );
+        }
+        else
+        {
+            Message( "Fail to load " + mapNames[ i ] );
+            fail++;
+        }
+    }
+
+    return "Done, maps converted " + ( success + fail ) + ", success " + success + ", fail " + fail + ".";
+}
+
+// Keep only one tile per hex
+string ClearTiles( string str )
+{
+    MapperMap@ map = GetActiveMap();
+    if( map is null )
+        return "Map not loaded.";
+
+    uint deleted = 0;
+    for( uint hx = 0; hx < map.Width; hx++ )
+    {
+        for( uint hy = 0; hy < map.Height; hy++ )
+        {
+            for( ; map.GetTilesCount( hx, hy, false ) > 1; deleted++ )
+                map.DeleteTile( hx, hy, false, 0 );
+            for( ; map.GetTilesCount( hx, hy, true )  > 1; deleted++ )
+                map.DeleteTile( hx, hy, true, 0 );
+        }
+    }
+
+    return "Done. Deleted " + deleted + " tiles.";
+}
+
+// Map parameters
+string MapTime( string str )
+{
+    MapperMap@ map = GetActiveMap();
+    if( map is null )
+        return "Map not loaded.";
+    int value = 0;
+    if( !StrToInt( str, value ) )
+        return "Wrong value.";
+
+    map.Time = value;
+    return "Done. Time setted to " + map.Time + ".";
+}
+
+string MapNoLogOut( string str )
+{
+    MapperMap@ map = GetActiveMap();
+    if( map is null )
+        return "Map not loaded.";
+    int value = 0;
+    if( !StrToInt( str, value ) )
+        return "Wrong value.";
+
+    map.NoLogOut = value != 0 ? true : false;
+    return "Done. NoLogOut setted to " + map.NoLogOut + ".";
+}
+
+string MapScriptModule( string str )
+{
+    MapperMap@ map = GetActiveMap();
+    if( map is null )
+        return "Map not loaded.";
+
+    map.set_ScriptModule(str);
+    return "Done. ScriptModule setted to " + map.get_ScriptModule() + ".";
+}
+
+string MapScriptFunc( string str )
+{
+    MapperMap@ map = GetActiveMap();
+    if( map is null )
+        return "Map not loaded.";
+
+    map.set_ScriptFunc(str);
+    return "Done. ScriptFunc setted to " + map.get_ScriptFunc() + ".";
+}
+
+
+string ShowRoutes(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+	
+	array<MapperObject@> entires;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 10 && ent < 130)
+		{
+			entires[i].set_PicMap("art\\scenery_phx\\routes\\route"+ent+".png");
+			entires[i].Update();
+		}
+	}
+	
+	return "Showing patrol routes.";
+}
+string HideRoutes(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+	
+	array<MapperObject@> entires;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 10 && ent < 100)
+		{
+			entires[i].set_PicMap("");
+			entires[i].Update();
+		}
+	}
+	
+	return "Hiding patrol routes.";
+}
+string DeleteRoutes(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+        return "Map not loaded.";
+
+    MapperObject@[] entires;
+    int             count = 0;
+    for (int i = 0, imax = map.GetObjects(1, 1, 10000, MAP_OBJECT_SCENERY, 3853, entires); i < imax; i++)
+    {
+        int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 10 && ent < 100)
+        {
+			DeleteObject(entires[i]);
+            count++;
+        }
+	}
+
+	return "Routes deleted - " + count + ".";
+}
+
+string ShowAsses(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+	
+	array<MapperObject@> entires;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 10 && ent < 130)
+		{
+			entires[i].set_PicMap("art\\scenery_phx\\routes\\route"+ent+".png");
+			entires[i].Update();
+		}
+	}
+	
+	return "You perv.";
+}
+
+string HideAsses(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+	
+	array<MapperObject@> entires;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 10 && ent < 130)
+		{
+			entires[i].set_PicMap("");
+			entires[i].Update();
+		}
+	}
+	
+	return "You prude.";
+}
+
+string EditGrids(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+	
+	array<string@> vals = split(str," ");
+	
+	int from = 0;
+	int to = 0;
+    if (vals.length() < 2 || !StrToInt(vals[0], from) || !StrToInt(vals[1], to)) return "error";
+    
+    
+	
+	array<MapperObject@> triggers;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3852,triggers); i<l; i++)
+    {
+		//int ent = entires[i].Scenery_ToEntire;
+		if (triggers[i].get_ScriptName() == "trigger" && triggers[i].get_FuncName() == "t_ExitGrid" && triggers[i].Scenery_Param0 == from)
+		{
+			triggers[i].Scenery_Param0 = to;
+			count++;
+		}
+	}
+	
+	return ("Changed "+count+" grids.");
+}
+
+string CountLife(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+	
+	uint hoboCount = 0;
+	uint critterCount = 0;
+	uint lifeCount = 0;
+	array<MapperObject@> entires;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 1010 && ent < 1050)
+		{
+			critterCount++;
+		}
+		else if (ent >= 1050 && ent < 1100)
+		{
+			hoboCount++;
+		}
+		else if (ent >= 1100 && ent < 1150)
+		{
+			lifeCount++;
+		}
+	}
+	
+	return "Life nodes: " + lifeCount + ", Hobo nodes: " + hoboCount + " Critter nodes: " + critterCount ;
+}
+
+string CountPCG(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+	
+	array<MapperObject@> entires;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent == 200)
+			count++;
+	}
+	
+	return "Counted " + count + " PCG nodes.";
+}
+
+string ShowLife(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+	
+	array<MapperObject@> entires;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 1000 && ent < 1110)
+		{
+			entires[i].set_PicMap( "art\\scenery_phx\\routes\\life"+ent+".png");
+			entires[i].Update();
+		}
+	}
+	
+	return "Showing life nodes.";
+}
+string HideLife(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+	
+	array<MapperObject@> entires;
+    int                  count = 0;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 1000 && ent < 1030)
+		{
+			entires[i].set_PicMap("");
+			entires[i].Update();
+		}
+	}
+	
+	return "Hiding life nodes.";
+}
+string DeleteLife(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+        return "Map not loaded.";
+
+    MapperObject@[] entires;
+    int             count = 0;
+    for (int i = 0, imax = map.GetObjects(1, 1, 10000, MAP_OBJECT_SCENERY, 3853, entires); i < imax; i++)
+    {
+        int ent = entires[i].Scenery_ToEntire;
+		if (ent >= 1000 && ent < 1030)
+        {
+			DeleteObject(entires[i]);
+            count++;
+        }
+	}
+
+	return "Life deleted - " + count + ".";
+}
+
+bool ShowTrees = false;
+string ShowTreeBlockers(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) return "Map not loaded.";
+
+	ShowTrees = !ShowTrees;
+	
+	array<MapperObject@> entires;
+    for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,entires); i<l; i++)
+    {
+		int ent = entires[i].Scenery_ToEntire;
+		if (ent == 420420)
+		{
+			if (ShowTrees)
+				entires[i].set_PicMap("art\\scenery_phx\\routes\\tree.png");
+			else 
+				entires[i].set_PicMap("");
+			entires[i].Update();
+		}
+	}
+	return "Toggled Markers : "  + ShowTrees;
+}
+
+string AddTreeBlockers(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int id = 0;
+    if (vals.length() < 1  || !StrToInt(vals[0], id)) 
+		return "error";
+
+	array<MapperObject@> entires;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,id,entires);
+    for (uint i=0; i<l; i++)
+    {
+		MapperObject@ obj = map.GetObject(entires[i].MapX , entires[i].MapY, MAP_OBJECT_SCENERY, 3853, 0);
+		if (valid(obj))
+			continue;
+
+		MapperObject@ newobj = map.AddObject( entires[i].MapX , entires[i].MapY, MAP_OBJECT_SCENERY, 3853);
+		newobj.Scenery_ToEntire = ENTIRE_SMOKE_HEX;
+	}
+
+	return "Added Trees : " + l ;
+}
+
+
+uint[][] ReplacePids = 
+{
+	{},{}
+//	{oldpid}, { newpid1, newpid2},
+};
+string Justjustfuckmyshitup(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,0,objects);
+	int counter = 0;
+    for (uint i=0; i<l; i++)
+    {		
+		for (uint k=0, j = ReplacePids.length(); k < j; k+= 2)
+		{
+			if ( objects[i].ProtoId >= 5562 && objects[i].ProtoId <= 5581 )
+			{
+				if (Random(0,100) <= chance)
+				{
+				//Add New
+					map.AddObject(objects[i].MapX, objects[i].MapY, MAP_OBJECT_SCENERY, objects[i].ProtoId+20);
+
+				//Remove Old
+					DeleteObject(objects[i]);			
+
+					counter++;
+				}
+			}
+		}
+	}
+
+	return "Done, amount of shit fucked up : " + counter;
+}
+
+string Justjustunfuckmyshitup(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,0,objects);
+	int counter = 0;
+    for (uint i=0; i<l; i++)
+    {		
+		for (uint k=0, j = ReplacePids.length(); k < j; k+= 2)
+		{
+			if ( objects[i].ProtoId >= 5562+20 && objects[i].ProtoId <= 5581+20 )
+			{
+				if (Random(0,100) <= chance)
+				{
+				//Add New
+					map.AddObject(objects[i].MapX, objects[i].MapY, MAP_OBJECT_SCENERY, objects[i].ProtoId-20);
+
+				//Remove Old
+					DeleteObject(objects[i]);
+					counter++;
+				}
+			}
+		}
+	}
+
+	return "Done, amount of shit unfucked up : " + counter;
+}
+
+
+string Justfuckmyshitup(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	int fromPid = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], fromPid)) 
+		return "Add fromPid value";
+
+	int toPid = 0;
+    if (vals.length() < 3  || !StrToInt(vals[2], toPid)) 
+		return "Add toPid value";
+
+	int type = 0;
+    if (vals.length() < 4  || !StrToInt(vals[3], type)) 
+		return "Add ObjectType ( 0 = Critter, 1 = Item, 2 = Scenery )";
+
+	if (type < 0 || type > 2)
+		return "You fucking idiot ( 0 = Critter, 1 = Item, 2 = Scenery )";
+
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,0,objects);
+	l +=map.GetObjects(1,1,10000,MAP_OBJECT_ITEM,0,objects);
+	int counter = 0;
+    for (uint i=0; i<l; i++)
+    {		
+		for (uint k=0, j = ReplacePids.length(); k < j; k+= 2)
+		{
+			if ( objects[i].ProtoId == fromPid)
+			{
+				if (Random(0,100) <= chance)
+				{
+				//Add New
+					map.AddObject(objects[i].MapX, objects[i].MapY, type, toPid);
+
+				//Remove Old
+					DeleteObject(objects[i]);
+					counter++;
+				}
+			}
+		}
+	}
+
+	return "Done, amount of shit fucked up : " + counter;
+}
+
+
+string justBricks(string str)
+{
+    MapperMap@ map = GetActiveMap();
+    if (map is null)
+        return "Map not loaded.";
+    
+    array<MapperObject@> objects;
+    int len = map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,0,objects);
+    
+    int[][] sceneryPids = 
+    {
+        {5631, 5627}, {5632, 5628}, {5633, 5629}, {5634, 5630}, {5643, 5665}, {5644, 5664}, {5586, 5545}, {5587, 5545}, {5589, 5551}, {5592, 5551}, {5594, 5553}, {5595, 5554}, {5597, 5555}, {5598, 5554}, {5601, 5553}, {5582, 5660}, {5583, 5661}, {5599, 5662}, {5600, 5663}, {5613, 5656}, {5614, 5658}, {5611, 5657}, {5609, 5655}, {5616, 5659}, {5593, 5654}, {5615, 5543}, {5612, 5561}, {5610, 5560}, {5591, 5546}, {5645, 5664}, {5596, 5665}, {5588, 5546}
+    };
+    
+    for (uint i=0; i<len; i++)
+    {
+        for (uint j=0; j<sceneryPids.length(); j++)
+        {
+            if (sceneryPids[j][0] == objects[i].ProtoId)
+            {
+                map.AddObject(objects[i].MapX, objects[i].MapY, MAP_OBJECT_SCENERY, sceneryPids[j][1]);
+                DeleteObject(objects[i]);
+            }
+        }
+    }
+    
+    return "Done";
+}
+
+
+
+string Triggered(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3852,objects);
+
+	for(uint i = 0; i < l; i++)
+	{
+		objects[i].set_ScriptName("trigger");
+		objects[i].set_FuncName("");
+	}
+
+	return "triggered";
+}
+
+string JUSTGRIDS(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+
+	int biggestniggus = 0; 
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3852,objects);
+	for(uint i = 0; i < l; i++)
+	{
+		if ( objects[i].Scenery_TriggerNum > biggestniggus)
+			biggestniggus = objects[i].Scenery_TriggerNum;
+	}
+	objects.set_length(0);
+	l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,2049,objects);
+
+	for(uint i = 0; i < l; i++)
+	{
+		MapperObject@ obj = 	map.AddObject( objects[i].MapX, objects[i].MapY, MAP_OBJECT_SCENERY, 3852);
+
+		obj.set_ScriptName("trigger");
+		obj.set_FuncName("t_ExitGrid");
+		obj.Scenery_ParamsCount = 2;
+		obj.Scenery_Param0 = objects[i].Scenery_ToMapPid;
+		obj.Scenery_Param1 = objects[i].Scenery_ToEntire;
+		obj.Scenery_TriggerNum = biggestniggus++;
+		DeleteObject(objects[i]);
+	}
+
+	return "triggered";
+}
+
+string Verify(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+	
+
+	for (uint i = 0 ; i < 30000; i++)
+	{
+		array<MapperObject@> objects;
+		int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,i,objects);
+
+		if ( l > 0 )
+			if ( objects[0].get_PicMap().length() > 0)
+			{
+			}
+			else
+			{
+				Log("Deleting: Scenery ProtoID " + i );
+				DeleteObjects(objects);
+			}
+	}
+
+	return "done";
+}
+
+MapperObject@ _ActiveObject = null;
+void PaintDraw()
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return;
+
+	uint16 ox=0,oy=0;
+
+	GetMonitorHex(__MouseX,__MouseY,ox,oy);
+	MapperObject@ obj = map.GetObject(ox,oy,  MAP_OBJECT_SCENERY, 3853, 0);
+	//MapperObject@ obj = map.GetObject(ox,oy, _ActiveObject.MapObjType, _ActiveObject.ProtoId, 0);
+	if (valid(obj))
+		return;
+
+	//map.AddObject(ox,oy, _ActiveObject.MapObjType, _ActiveObject.ProtoId);
+
+	MapperObject@ entire = map.AddObject( ox, oy, MAP_OBJECT_SCENERY, 3853);
+	entire.Scenery_ToEntire = ENTIRE_DYNAMIC_TRIGGER_HEX;
+}
+
+string Remove(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	int fromPid = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], fromPid)) 
+		return "Add fromPid value";
+	
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,0,objects);
+	l +=map.GetObjects(1,1,10000,MAP_OBJECT_ITEM,0,objects);
+	int counter = 0;
+    for (uint i=0; i<l; i++)
+    {			
+		if ( objects[i].ProtoId == fromPid)
+		{
+			if (Random(0,100) <= chance)
+			{
+			//Remove Old
+				DeleteObject(objects[i]);
+				counter++;
+			}
+		}		
+	}
+	return "Done, removed : " + counter;
+}
+
+string FillSoil(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	int count = 0;
+	for (uint x = 0, xx = map.Width; x < xx; x++)
+	{
+		for (uint y = 0 , yy = map.Height; y < yy; y++)
+		{
+			count++;
+			string@ str = map.GetTileName(x,y,false, 0);
+
+			uint watisdis = map.GetTile(x,y,false, 0);
+
+
+			if (!valid(str) || watisdis == 0)
+				continue;			
+
+			if( watisdis == 1648271536 ||
+				watisdis == 1600030976 ||
+				watisdis == 419361744 ||
+				watisdis == 631167584  )
+			{
+				uint16 tx = x ,ty = y;
+				MoveHexByDir(tx,ty,3,1);
+				MapperObject@ entire = map.AddObject( tx, ty, MAP_OBJECT_SCENERY, 3853);
+				entire.Scenery_ToEntire = ENTIRE_DYNAMIC_TRIGGER_HEX;
+				MoveHexByDir(tx,ty,2,1);
+				MapperObject@ entire2 = map.AddObject( tx, ty, MAP_OBJECT_SCENERY, 3853);
+				entire2.Scenery_ToEntire = ENTIRE_DYNAMIC_TRIGGER_HEX;
+			}
+			else if (watisdis == 2545813104)
+			{
+				uint16 tx = x ,ty = y;
+				MoveHexByDir(tx,ty,3,1);
+				MapperObject@ entire = map.AddObject( tx, ty, MAP_OBJECT_SCENERY, 3853);
+				entire.Scenery_ToEntire = ENTIRE_DYNAMIC_TRIGGER_HEX;
+			}
+			
+		}
+	}
+
+	return "Youve gone done it" + count;
+}
+
+
+string RemoveEntire(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	int fromPid = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], fromPid)) 
+		return "Add Entire value";
+	
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,0,objects);
+	l +=map.GetObjects(1,1,10000,MAP_OBJECT_ITEM,0,objects);
+	int counter = 0;
+    for (uint i=0; i<l; i++)
+    {		
+		if ( objects[i].ProtoId == 3853 && objects[i].Scenery_ToEntire == fromPid)
+		{
+			if (Random(0,100) <= chance)
+			{
+			//Remove Old
+				DeleteObject(objects[i]);
+				counter++;
+			}
+		}		
+	}
+	return "Done, removed : " + counter;
+
+}
+string Fill(string str)
+{
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	uint16 ox=0,oy=0;
+	GetMonitorHex(__MouseX,__MouseY,ox,oy);
+	Fill(ox,oy,ox,oy, chance);
+
+	MapperMap@ map = GetActiveMap();
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,0,objects);
+	l +=map.GetObjects(1,1,10000,MAP_OBJECT_ITEM,0,objects);
+
+    for (uint i=0; i<l; i++)
+    {		
+		if ( objects[i].ProtoId == 3853 && objects[i].Scenery_ToEntire == 98084894)
+		{		
+			DeleteObject(objects[i]);	
+		}		
+	}
+	return "done filled";
+}
+
+string MakeMapExtFile(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "open A map you shit";
+	array<MapperObject@> objs;
+	file f;
+	if (f.open("./"+str, "w") < 0)
+	{
+		return "Could not open file to write";
+	}
+	array<uint16> data;
+	for (uint i=0, l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,objs); i<l; i++)
+    {
+		if ( objs[i].Scenery_ToEntire != ENTIRE_DYNAMIC_TRIGGER_HEX)
+			continue;
+		
+		data.insertLast(objs[i].MapX);
+		data.insertLast(objs[i].MapY);
+	}
+
+	f.writeUint32(data.length() / 2);
+	for (uint i = 0, l = data.length(); i < l;i++)
+	{
+		f.writeUint16(data[i]);
+	}
+	f.close();
+	return "file saved " + str ;
+}
+
+string FillGrass(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	int Pid = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], Pid)) 
+		return "Add Pid value";
+
+	int count = 0;
+	for (uint x = 0, xx = map.Width; x < xx; x++)
+	{
+		for (uint y = 0 , yy = map.Height; y < yy; y++)
+		{
+			
+			//string@ str = map.GetTileName(x,y,false, 0);
+			uint watisdis = map.GetTile(x,y,false, 0);
+
+
+			if (watisdis == 0)
+				continue;			
+
+			if( watisdis == 4232305804 ||
+				watisdis == 3240359228 ||
+				watisdis == 2256769004 ||
+				watisdis == 3152258652 || 
+				watisdis == 163805772 ||
+				watisdis == 883119100 ||
+				watisdis == 1929586988 ||
+				watisdis == 1315111068 || 
+				watisdis == 3425933133 )
+			{
+				if ( chance < Random ( 0, 100 ) )
+					continue;
+					
+				uint16 tx = x ,ty = y;
+				MoveHexByDir(tx,ty,5,Random(0,1));
+				MoveHexByDir(tx,ty,3,Random(0,1));
+				MapperObject@ obj = map.GetObject(x, y, MAP_OBJECT_SCENERY, Pid, 0);
+				if ( valid (obj))
+					continue;
+
+				MapperObject@ entire = map.AddObject( tx, ty, MAP_OBJECT_SCENERY, Pid );	
+				count++;
+			}			
+		}
+	}
+	return "Youve gone done it" + count;
+}
+
+string FillTile(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	int Pid = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], Pid)) 
+		return "Add Pid value";
+
+	uint[] hashes;
+	for(uint i = 2; i < vals.length(); i++)
+	{
+		uint hash = 0;
+		uint fuck = 0;
+		hash = GetStrHash("art\\tiles\\"+ vals[i]);
+		hashes.insertLast(hash);
+	}
+
+	int count = 0;
+	for (uint x = 0, xx = map.Width; x < xx; x++)
+	{
+		for (uint y = 0 , yy = map.Height; y < yy; y++)
+		{
+			
+			bool doit = false;
+			//string@ str = map.GetTileName(x,y,false, 0);
+			uint watisdis = map.GetTile(x,y,false, 0);
+
+
+			if (watisdis == 0)
+				continue;			
+
+			for (uint i = 0; i < hashes.length(); i++)
+			{
+				if ( hashes[i] == watisdis )
+				{
+					doit = true;
+				}
+			}
+			if( doit )
+			{
+				if ( chance < Random ( 0, 1000 ) )
+					continue;
+					
+				uint16 tx = x ,ty = y;
+				MoveHexByDir(tx,ty,5,Random(0,1));
+				MoveHexByDir(tx,ty,3,Random(0,1));
+				MapperObject@ obj = map.GetObject(x, y, MAP_OBJECT_SCENERY, Pid, 0);
+				if ( valid (obj))
+					continue;
+
+				MapperObject@ entire = map.AddObject( tx, ty, MAP_OBJECT_SCENERY, Pid );	
+				count++;
+			}			
+		}
+	}
+	return "Youve gone done it " + count;
+}
+
+string p(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	int	chance = 5;
+	int count = 0;
+	for (uint Pid = 23050; Pid < 23072; Pid++)
+	{
+		
+	
+		for (uint x = 0, xx = map.Width; x < xx; x++)
+		{
+			for (uint y = 0 , yy = map.Height; y < yy; y++)
+			{
+			
+				//string@ str = map.GetTileName(x,y,false, 0);
+				uint watisdis = map.GetTile(x,y,false, 0);
+
+				if (watisdis == 0)
+					continue;			
+
+				if ( chance < Random ( 0, 1000 ) )
+					continue;
+					
+				uint16 tx = x ,ty = y;
+				MoveHexByDir(tx,ty,5,Random(0,1));
+				MoveHexByDir(tx,ty,3,Random(0,1));
+				MapperObject@ obj = map.GetObject(x, y, MAP_OBJECT_SCENERY, Pid, 0);
+				if ( valid (obj))
+					continue;
+
+				MapperObject@ entire = map.AddObject( tx, ty, MAP_OBJECT_SCENERY, Pid );	
+				count++;
+						
+			}
+		}
+	}
+	return "Filled " + count;
+
+}
+
+string FillAll(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	int Pid = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], Pid)) 
+		return "Add Pid value";
+
+	int count = 0;
+	for (uint x = 0, xx = map.Width; x < xx; x++)
+	{
+		for (uint y = 0 , yy = map.Height; y < yy; y++)
+		{
+			
+			//string@ str = map.GetTileName(x,y,false, 0);
+			uint watisdis = map.GetTile(x,y,false, 0);
+
+			if (watisdis == 0)
+				continue;			
+
+			if ( chance < Random ( 0, 1000 ) )
+				continue;
+					
+			uint16 tx = x ,ty = y;
+			MoveHexByDir(tx,ty,5,Random(0,1));
+			MoveHexByDir(tx,ty,3,Random(0,1));
+			MapperObject@ obj = map.GetObject(x, y, MAP_OBJECT_SCENERY, Pid, 0);
+			if ( valid (obj))
+				continue;
+
+			MapperObject@ entire = map.AddObject( tx, ty, MAP_OBJECT_SCENERY, Pid );	
+			count++;
+						
+		}
+	}
+	return "Filled " + count;
+}
+
+string KillAll(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	int Pid = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], Pid)) 
+		return "Add Pid value";
+
+	int count = 0;
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,Pid,objects);
+	int counter = 0;
+    for (uint i=0; i<l; i++)
+    {		
+		if (Random(0,1000) <= chance)
+		{
+			//Remove Old
+			DeleteObject(objects[i]);
+			counter++;
+		}	
+	}
+	return "Killed " + counter;
+}
+
+string KillAllAll(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int chance = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], chance)) 
+		return "Add chance value";
+
+	int Pid = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], Pid)) 
+		return "Add Pid value";
+
+	int count = 0;
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,Pid,objects);
+	int counter = 0;
+    for (uint i=0; i<l; i++)
+    {		
+		if (Random(0,1000) <= chance)
+		{
+			//Remove Old
+			DeleteObject(objects[i]);
+			counter++;
+		}	
+	}
+	objects.set_length(0);
+	l=map.GetObjects(1,1,10000,MAP_OBJECT_ITEM,Pid,objects);
+	for (uint i=0; i<l; i++)
+    {		
+		if (Random(0,1000) <= chance)
+		{
+			//Remove Old
+			DeleteObject(objects[i]);
+			counter++;
+		}	
+	}
+	return "Killed " + counter;
+}
+
+string DeleteDuplicates (string str)
+{
+    MapperMap@ map = GetActiveMap();
+    if (map is null)
+        return "Map not loaded.";
+    
+    for (uint x=0; x<map.Width; x++)
+    {
+        for (uint y=0; y<map.Height; y++)
+        {
+            array<MapperObject@> scen, items;
+            int[] scenPids, itemPids;
+
+            int scenLen = map.GetObjects(x,y,0,MAP_OBJECT_SCENERY,0,scen);
+            int itemsLen = map.GetObjects(x,y,0,MAP_OBJECT_ITEM,0,items);
+
+            for (uint i=0; i<scenLen; i++) 
+            {
+                if (scenPids.find(scen[i].ProtoId) < 0 || scenPids.length() == 0) 
+                {
+                    scenPids.insertLast(scen[i].ProtoId);
+                } 
+                else 
+                {
+                    DeleteObject(scen[i]);
+                }
+            }
+
+            for (uint i=0; i<itemsLen; i++) 
+            {
+                if (itemPids.find(items[i].ProtoId) < 0 || itemPids.length() == 0) 
+                {
+                    itemPids.insertLast(items[i].ProtoId);
+                } 
+                else 
+                {
+                    DeleteObject(items[i]);
+                }
+            }
+        }
+    }
+
+    return "duplicates yeeted";
+}
+
+
+string Hash(string str)
+{
+	return str + " > " + GetStrHash(str);
+}
+//string[] group_road_clean = {"road01","road02","road03","road04","road05","road06","road07","road08","road09",
+//					"road44","road45","road50","road51","road57","road58","road59","road60","road72","road73","road74"};
+//string[] group_road_broken = {"road34","road35","road36","road37","road38","road39"};
+//string[] group_road_edge = {"road10","road11","road12","road13","road14","road15","road16","road17","road18",
+//					"road19","road20","road21","road22","road23","road24","road25","road26","road27",
+//					"road28","road29","road30","road31","road32","road33","road40","road41","road42","road43",
+//					"road46","road47","road48","road49","road52","road53","road54","road55","road61","road62",
+//					"road63","road64","road65","road66","road67","road68"};
+//
+//
+//string[] road_edge = {"road22", "road23", "road24", "road25", // Topleft, top , top ,top right
+//					  "road26", "road27", "road28", // Right, right, rightbottom 
+//					  "road29","road30","road31", // bottom, bottom, bottomleft
+//					  "road32","road33"} // left, left 
+//
+//string JustCity(string str)
+//{
+//	MapperMap@ map = GetActiveMap();
+//	if (!valid(map))
+//		return "open A map you shit";
+//	
+//	uint[] roadhash;
+//	for(uint i=0; i < group_road_clean.length(); i++)
+//		roadhash.insertLast(GetStrHash(group_road_clean[i]));
+//
+//	group_road_broken_hash.set_length(0);
+//	for(uint i=0; i < group_road_broken.length(); i++)
+//		roadhash.insertLast(GetStrHash(group_road_broken[i]));
+//
+//
+//	uint[] road_coords_x;
+//	uint[] road_coords_y;
+//
+//	for(uint x =0; x < map.Width; x++)
+//	{
+//		for (uint y = 0; y < map.Height; y++)
+//		{
+//			uint tileId = map.GetTile(x,y,false, 0);
+//			for(uint i=0; i < roadhash.length(); i++)
+//			{
+//				if (roadhash[i] == tileId)
+//				{
+//					road_coords_x.insertLast(x);
+//					road_coords_y.insertLast(y);
+//				}
+//			}
+//		}
+//	}	
+//
+//	string ret = ":";
+//	for(uint i = 0, l = Random(1,10); i < l;i++)
+//		ret +="D";
+//
+//	return ":DDD";
+//}
+
+string id(string str)
+{
+	MapperObject@ obj = GetSelectedObject();
+
+	return "UID:"+ obj.UID;
+}
+uint UIDCOUNTER = 1;
+void GetNear(uint16 x, uint16 y, array<MapperObject@>& dat, MapperMap& map, MapperObject& ref )
+{
+	MapperObject@ exist = map.GetObject(x,y, ref.MapObjType, ref.ProtoId, 0);
+	if (!valid(exist))
+	{
+		Log("A"+x + "," + y);
+		return;
+	}
+	
+	for(uint i =0, l = dat.length(); i < l; i++)
+	{
+		if ( exist.MapX == dat[i].MapX &&  exist.MapY == dat[i].MapY)
+		{
+			Log("B" +x + "," + y);
+			return;
+		}
+	}
+
+	dat.insertLast(@exist);
+	for (uint i =0 ; i < 6; i++)
+	{
+		uint16 ox = x;
+		uint16 oy = y;
+		MoveHexByDir(ox,oy,i,1);
+		GetNear(ox,oy, dat, map, ref);
+	}	
+}
+
+string GetNear(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "";
+
+	int count = 0;
+
+	array<MapperObject@> dat;
+	MapperObject@ obj = GetSelectedObject();
+	
+	for (uint i =0 ; i < 6; i++)
+	{
+		uint16 ox = obj.MapX;
+		uint16 oy = obj.MapY;
+		MoveHexByDir(ox,oy,i,1);
+		GetNear(ox,oy, dat, map, obj);
+	}	
+	for(uint i =0, l = dat.length(); i < l; i++)
+	{
+		if ( obj.MapX == dat[i].MapX &&  obj.MapY == dat[i].MapY)
+		{
+			dat.removeAt(i);
+			break;
+		}
+	}
+	SelectObjects ( dat, true );
+	return "Got" + dat.length();
+}
+
+void Fill(uint16 x, uint16 y, uint16 fx, uint16 fy, uint chance)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return;
+	
+	MapperObject@ exist = map.GetObject(x,y,  MAP_OBJECT_SCENERY, 0, 0);
+	if (valid(exist))
+		return;
+
+	int dist = GetDistantion(x, y, fx, fy);
+	int pathdist = GetPathLength(x, y, fx, fy, 0);
+
+	if (dist != pathdist)
+		return;
+
+	if (Random(0,100) <= chance)
+	{
+		MapperObject@ entire = map.AddObject( x, y, MAP_OBJECT_SCENERY, 3853);
+		entire.Scenery_ToEntire = ENTIRE_DYNAMIC_TRIGGER_HEX;
+	}
+	else
+	{
+		MapperObject@ entire = map.AddObject( x, y, MAP_OBJECT_SCENERY, 3853);
+		entire.Scenery_ToEntire = 98084894;
+	}
+
+	for (uint i =0 ; i < 6; i++)
+	{
+		uint16 ox = x;
+		uint16 oy = y;
+		MoveHexByDir(ox,oy,i,1);
+		Fill(ox,oy, x, y, chance);
+	}	
+
+}
+
+
+
+void PaintErase()
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return;
+
+	uint16 ox=0,oy=0;
+
+	GetMonitorHex(__MouseX,__MouseY,ox,oy);
+	MapperObject@ obj = map.GetObject(ox,oy, _ActiveObject.MapObjType, _ActiveObject.ProtoId, 0);
+	if (!valid(obj))
+		return;
+
+	DeleteObject(obj);
+
+}
+
+string lp(string str)
+{
+	PrefabList.set_length(0);
+	string list = dirlist("../../server/maps/prefabs/" + str);
+
+	array<string@> files = split(list, "\n");
+
+	for (uint i = 0, l = files.length(); i < l; i++)
+	{
+		Message("../../server/maps/prefabs/" + str +"/"+ files[i]);
+		Prefab newFab = Prefab( "../../server/maps/prefabs/" + str +"/"+ files[i] );
+		PrefabList.insertLast(newFab);
+//		LoadPrefab("../../server/maps/prefabs/" + files[i]);
+	}
+
+	Message("Total Prefabs: " + PrefabList.length());
+	return "Total Prefabs: " + PrefabList.length();
+}
+
+
+array<Prefab@> PrefabList;
+
+void LoadPrefab(string path)
+{	
+	int[] newPrefab; 
+	file f;
+	if (f.open(path, "r") >= 0)
+	{	
+		while (! f.isEndOfFile())
+		{
+			string line;
+			f.readLine(line);
+			line = substring(line, 0, line.length() - 1);
+			array<string@> data = split(line,",");
+
+			if (data.length() == 3 )
+				for(uint i = 0; i < 3 ; i++)
+				{
+					int val; 
+					StrToInt(data[i], val);					
+					newPrefab.insertLast(val);
+				}
+		}		
+	}
+	f.close();
+}
+
+class Prefab
+{
+	int offsetx;
+	int offsety;
+	int width;
+	int height;
+	int[] data;
+	int adjusty;
+	int adjustx;
+	string path;
+	int originX;
+	int originY;
+
+	Prefab(string path)
+	{		
+		file f;
+		if (f.open(path, "r") >= 0)
+		{
+			int count = f.readUint32();
+			for (uint i = 0 ; i < count ; i++)
+			{
+				data.insertLast(f.readUint32());
+				data.insertLast(f.readUint32());
+				data.insertLast(f.readUint32());
+			}
+			this.width = (f.readUint32());
+			this.height = (f.readUint32());
+			this.offsetx = (f.readUint32());
+			this.offsety = (f.readUint32());
+		}
+		else
+		{
+			Log("SHIT IS FUCKED" + path);
+			return;
+		}
+
+		f.close();
+		this.path = path;
+
+		this.Adjust();
+		Log(this.Dump());
+	}
+
+	string Dump()
+	{
+		string str;
+		str += path +"\n";
+		str += offsetx  +"\n";
+		str += offsety  +"\n";
+		str += "width" + width  +"\n";
+		str += "height" + height  +"\n";		
+		str += "adjustx:"+ adjustx  +"\n";
+		str += "adjusty:"+adjusty  +"\n";
+		str += "originx:"+ originX  +"\n";
+		str += "originy:"+ originY + "\n";
+		/*for (uint i= 0, l = data.length(); i < l ; i++)
+			str += data[i] + ",";*/
+		return str;
+	}
+	void Adjust()
+	{
+		int minX = 0;
+		int minY = 0;
+		for (uint i = 0; i < data.length(); i+=3)
+		{
+			minX = MAX(data[i],minX);	
+			minY = MAX(data[i+1],minY);
+		}
+		this.adjusty= minY;
+		this.adjustx= minX;
+	}
+
+	void Save()
+	{
+		file f;
+		if (f.open(path, "w") >= 0)
+		{
+			f.writeUint32(data.length() / 3);
+			for(uint i = 0; i < data.length(); i++)
+			{						
+				f.writeUint32(data[i]);
+			}
+			f.writeUint32(width);
+			f.writeUint32(height);
+			f.writeUint32(offsetx);
+			f.writeUint32(offsety);
+		}
+		f.close();
+	}
+}
+
+string tpall(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "";
+	
+	array<MapperObject@> objects;
+	map.GetObjects(1,1,100000,MAP_OBJECT_SCENERY,0,objects);
+	map.GetObjects(1,1,100000,MAP_OBJECT_ITEM,0,objects);	
+	DeleteObjects(objects);	
+
+	uint16 ox = 0, oy = 0;
+	array<string@> vals = split(str," ");
+	lp(vals[0]);
+
+	int ofx = 0, ofy = 0;	
+    if (vals.length() > 1 && StrToInt(vals[1], ofx)) 
+	{
+		ox = ofx;
+	}	
+
+	if (vals.length() > 2  && StrToInt(vals[2], ofy)) 
+	{
+		oy = ofy;
+	}
+
+	for (uint i = 0; i < PrefabList.length(); i++)
+	{
+		int row = i % 10;
+		int col = i / 10;
+		PlacePrefab(map, ox + row * 50, oy + col * 50, i);
+	}
+	return "";
+}
+
+string tp(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "";
+
+	uint16 ox=0,oy=0;
+	int q, qq;
+	GetMonitorHex(__MouseX,__MouseY,ox,oy);
+
+	PrefabList.set_length(0);
+	Prefab newFab = Prefab( str );
+	PrefabList.insertLast(newFab);
+	PlacePrefab(map,ox, oy, 0);
+	PlacePrefab(map,ox + 1, oy, 0);
+	return "";
+}
+string FixPrefab(string str)
+{
+	array<string@> vals = split(str," ");	
+
+	array<MapperObject@> objects;
+	if ( GetSelectedObjects(objects) != 1 )
+	   return "Select a prefab object";
+
+	Prefab newFab = Prefab( vals[0] );
+	int ofx = 0, ofy = 0;	
+    if ( StrToInt(vals[0], ofx)) 
+	{
+		PrefabList[objects[0].UserData0].offsetx = ofx;
+	}	
+
+	if (vals.length() > 1 && StrToInt(vals[1], ofy)) 
+	{
+		PrefabList[objects[0].UserData0].offsety = ofy;
+	}
+	PrefabList[objects[0].UserData0].Save();
+
+	return "Updated: " + PrefabList[objects[0].UserData0].path;
+}
+
+string MakePrefab(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "";
+	array<MapperObject@> objs;
+	uint count = GetSelectedObjects(objs);
+	
+	array<string@> vals = split(str," ");	
+
+	int Pid = 0;
+	file f;
+	if (f.open("./prefab/"+vals[0]  , "w") >= 0)
+	{
+		int minX = 0;
+		int minY = 0;
+		int maxX = 0;
+		int maxY = 0;
+		MapperObject@ originObj = objs[0];
+		f.writeUint32(count);
+
+		for(uint i = 0; i < count; i++)
+		{
+			int OffsetX = originObj.MapX - objs[i].MapX; 
+			int OffsetY = originObj.MapY - objs[i].MapY;			
+						
+			f.writeUint32(OffsetX);
+			f.writeUint32(OffsetY);
+			f.writeUint32(objs[i].ProtoId);
+
+			minX = MIN(OffsetX,minX);
+			maxX = MAX(OffsetX,maxX);			
+			minY = MIN(OffsetY,minY);
+			maxY = MAX(OffsetY,maxY);
+		}
+		f.writeUint32(maxX - minX);
+		f.writeUint32(maxY - minY);
+		f.writeUint32(originObj.MapX & 1);
+		f.writeUint32(originObj.MapY & 1);
+	}
+	f.close();
+	return "Saved to " + "./prefab/"+str;
+}
+
+bool BlocklinesMode = false;
+
+string bl(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "";
+
+	BlocklinesMode = !BlocklinesMode;
+
+	return "BlocklinesMode:" + BlocklinesMode;
+}
+
+
+string justFixEntires(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "";
+
+	array<MapperObject@> objects;
+	array<MapperObject@> fuckers;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,3853,objects);
+	int counter = 0;
+	int[] dirs = {0,2,3,4,5,0};
+	for (uint i=0; i<l; i++)
+	{			
+		if ( objects[i].Scenery_ToEntire > 10000 )
+			continue;
+
+		uint16 x = objects[i].MapX;
+		uint16 y = objects[i].MapY;
+		
+		for (uint c = 0 ; c < 6; c++ )
+		{
+			MoveHexByDir(x,y,dirs[c],1);
+			if (! map.IsHexPassed(x,y) ) 
+			{
+				MoveScreen(objects[i].MapX, objects[i].MapY, 0);
+				fuckers.insertLast( objects[i] );
+				SelectObjects ( fuckers, true );
+				return "";
+			}
+		}
+	}
+	
+	return "Fuckers" + fuckers.length();
+}
+
+#include "Mapper\mapper_pcg.fos"
+
+
+uint16[] getSquareOrigin ()
+{
+	MapperMap@ map = GetActiveMap();
+
+	array<MapperObject@> objects;
+	int l=map.GetObjects(1,1,10000,MAP_OBJECT_SCENERY,4012,objects);
+	int minHexX, minHexY, minScore, maxHexX, maxHexY, maxScore;
+	for (uint i=0; i<l; i++)
+	{	
+		float x = objects[i].MapX, y = objects[i].MapY;
+		Hex2Square(x,y,0,0);
+		float score = x + y ;
+		if ( i == 0 )
+		{
+			minScore = score;
+			maxScore = score;
+		}
+		else
+		{				
+			if (score < minScore )
+			{
+				minScore = score;
+				minHexX = objects[i].MapX;
+				minHexY = objects[i].MapY;
+			}
+			
+			if ( score > maxScore )
+			{
+				maxScore = score;
+				maxHexX = objects[i].MapX;
+				maxHexY = objects[i].MapY;
+			}
+		}
+	}
+
+	uint16[] ret;
+	ret.insertLast(minHexX);
+	ret.insertLast(minHexY);
+
+	ret.insertLast(maxHexX);
+	ret.insertLast(maxHexY);
+
+	Message("Corner Blocker = " + minHexX + "," + minHexY  + " MAX " + maxHexX + "," + maxHexY);
+	return ret;
+}
+
+string farm (string str)
+{
+	MapperMap@ map = GetActiveMap();
+	lp("urban");
+	uint16[] boundingHex = getSquareOrigin();
+
+	//Get Max Square X,Y
+	uint16 maxSx = boundingHex[2], maxSy = boundingHex[3]; 
+	Hex2Square(maxSx,maxSy,boundingHex[0],boundingHex[1]);
+
+	Message("Squarespace" + maxSx + "," + maxSy );
+	//Middle point
+	uint16 mx = maxSx / 2 ;
+	uint16 my = maxSy / 2 ;
+	uint PADDING = 4;
+
+	Square2Hex(mx, my, boundingHex[0],boundingHex[1]);
+
+	uint idx = Random(0, PrefabList.length());
+
+	//Place structure
+	PlacePrefab(map, mx - PrefabList[idx].width / 2  , my - PrefabList[idx].height - PADDING , idx );
+	
+	//Congregate npcs
+	uint tx = mx + Random ( PrefabList[idx].width / 2 + PADDING, PrefabList[idx].width / 2 + PADDING * 2 );
+	uint ty = my - Random ( PADDING , PADDING * 2 );
+	//Add farmer
+	map.AddObject( tx , ty , MAP_OBJECT_CRITTER, 9999);
+
+	//Add Dogs	
+	map.AddObject( tx + (Random(-3,3)) , ty + (Random(-3,3)), MAP_OBJECT_CRITTER, 22);	
+
+	//10 x 10 farm
+	for ( uint x = 0, lx = Random(10,20); x < lx ; x++)
+		for ( uint y = 0, ly = Random(10,20); y < ly; y++)
+			if (Random(0,4) == 0 )
+				continue;
+			else
+				map.AddObject( mx + x * 3 , my + y , MAP_OBJECT_SCENERY, 2963);
+
+	return "";
+}
+
+string cows (string str)
+{
+	MapperMap@ map = GetActiveMap();
+	lp("urban");
+	uint16[] boundingHex = getSquareOrigin();
+
+	//Get Max Square X,Y
+	uint16 maxSx = boundingHex[2], maxSy = boundingHex[3]; 
+	Hex2Square(maxSx,maxSy,boundingHex[0],boundingHex[1]);
+
+	Message("Squarespace" + maxSx + "," + maxSy );
+	//Middle point
+	uint16 mx = maxSx / 2 ;
+	uint16 my = maxSy / 2 ;
+	uint PADDING = 4;
+
+	Square2Hex(mx, my, boundingHex[0],boundingHex[1]);
+
+	uint idx = Random(0, PrefabList.length());
+
+	map.AddObject( mx, my , MAP_OBJECT_SCENERY, 2001);
+
+	//Place structure
+	PlacePrefab(map, mx - PrefabList[idx].width / 2  , my - PrefabList[idx].height - PADDING , idx );
+	
+	//Congregate npcs
+	uint tx = mx + Random ( PrefabList[idx].width / 2 + PADDING, PrefabList[idx].width / 2 + PADDING * 2 );
+	uint ty = my - Random ( PADDING , PADDING * 2 );
+	//Add farmer
+	map.AddObject( tx , ty , MAP_OBJECT_CRITTER, 9999);
+
+	//Add Dogs	
+	map.AddObject( tx + (Random(-3,3)) , ty + (Random(-3,3)), MAP_OBJECT_CRITTER, 22);	
+
+	//10 x 10 farm
+	for ( uint x = 0, lx = Random(6,12); x < lx ; x++)
+		map.AddObject( mx  + Random (0, 20), my + Random (0, 20) , MAP_OBJECT_CRITTER, 20);
+
+	return "";
+}
+
+string lumber (string str)
+{
+	MapperMap@ map = GetActiveMap();
+	lp("forest");
+	uint16[] boundingHex = getSquareOrigin();
+
+	//Get Max Square X,Y
+	uint16 maxSx = boundingHex[2], maxSy = boundingHex[3]; 
+	Hex2Square(maxSx,maxSy,boundingHex[0],boundingHex[1]);
+
+	Message("Squarespace" + maxSx + "," + maxSy );
+	//Middle point
+	uint16 mx = maxSx / 2 ;
+	uint16 my = maxSy / 2 ;
+	uint PADDING = 4;
+
+	Square2Hex(mx, my, boundingHex[0],boundingHex[1]);
+
+	uint idx = Random(0, PrefabList.length());
+
+	//Place structure
+	PlacePrefab(map, mx - PrefabList[idx].width / 2  , my - PrefabList[idx].height - PADDING , idx );
+	
+	//Congregate npcs
+	uint tx = mx + Random ( PrefabList[idx].width / 2 + PADDING, PrefabList[idx].width / 2 + PADDING * 2 );
+	uint ty = my - Random ( PADDING , PADDING * 2 );
+	//Add farmer
+	map.AddObject( tx , ty , MAP_OBJECT_CRITTER, 9999);
+
+	//Add Dogs	
+	map.AddObject( tx + (Random(-3,3)) , ty + (Random(-3,3)), MAP_OBJECT_CRITTER, 22);	
+
+	//10 x 10 farm
+	for ( uint x = 0, lx = Random(10,20); x < lx ; x++)
+		for ( uint y = 0, ly = Random(10,20); y < ly; y++)
+			if (Random(0,4) == 0 )
+				continue;
+			else
+				map.AddObject( mx + x * 3 , my + y , MAP_OBJECT_SCENERY, 2963);
+
+	return "";
+
+
+}
+string h2s(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (map is null) 
+		return "Map not loaded.";
+
+	array<string@> vals = split(str," ");	
+	int x = 0;
+    if (vals.length() < 1|| !StrToInt(vals[0], x)) 
+		return "Add x";
+
+	int y = 0;
+    if (vals.length() < 2  || !StrToInt(vals[1], y)) 
+		return "Add y";
+
+	int offx = 0;
+    if (vals.length() < 3  || !StrToInt(vals[2], offx)) 
+		return "Add offx";
+
+	int offy = 0;
+    if (vals.length() < 4  || !StrToInt(vals[3], offy)) 
+		return "Add offy";
+	
+	float xx = x, yy = y;
+
+	if ( Hex2Square(xx,yy,offx,offy) )
+		return "x"+xx+"y"+yy;
+	else
+		return "failed";
+}
+
+string border (string str)
+{
+	MapperMap@ map = GetActiveMap();
+	uint16[] boundingHex = getSquareOrigin();
+	
+	MapperObject@ tl = map.AddObject( boundingHex[0], boundingHex[1] , MAP_OBJECT_SCENERY, 3853);
+	tl.Scenery_ToEntire = 99999;
+
+	MapperObject@ br = map.AddObject( boundingHex[2], boundingHex[3] , MAP_OBJECT_SCENERY, 3853);
+	br.Scenery_ToEntire = 99998;
+
+	return "done";
+}
+
+string MPB(string str)
+{
+	return MakePCGBlock(str);
+}
+string MakePCGBlock(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "";
+	array<MapperObject@> objs;
+	uint count = GetSelectedObjects(objs);
+	
+	array<string@> vals = split(str," ");	
+
+	int Pid = 0;
+	file f;
+	if (f.open("./bl/"+vals[0]  , "w") >= 0)
+	{
+		int minX = 0;
+		int minY = 0;
+		int maxX = 0;
+		int maxY = 0;
+		MapperObject@ originObj = objs[0];
+		
+
+		f.writeString( "[Proto]\n");
+		f.writeString( "ProtoId=" + originObj.ProtoId +"\n");
+		f.writeString( "Type=12\n");
+		f.writeString( "PicMap=" + originObj.get_PicMap() +"\n");
+		f.writeString( "PicInv=art\\inven\\reserved.frm\n");	
+		f.writeString( "Flags=33554432\n");
+
+		for(uint i = 1; i < count; i++)
+		{	
+			int childId = i - 1 ;
+			f.writeString( "ChildPid_" + childId +"=" +objs[i].ProtoId +"\n") ;
+			f.writeString( "ChildLines_" + childId +"=" + getLine(originObj.MapX, originObj.MapY, objs[i].MapX, objs[i].MapY ) +"\n") ;
+		}	
+	}
+	f.close();
+	return "Saved to " + "./bl/"+str;
+}
+
+string getLine(int x, int y, int tx, int ty)
+{
+	int dx = tx - x;
+	int dy = ty - y;
+
+	//we only traverse 4 directions for sanity
+	// 5 negative or 2 for positive Y
+	// 4 / 1 for X
+	
+	string bl = "";
+
+	
+	int xTravs = 0;
+	int yTravs = dy;
+	
+	if ((x & 1) == 0) // even start hex
+	{
+		if (dx < 0)
+			yTravs += (dx - 1) / 2;
+		else
+			yTravs += dx / 2;
+		
+		xTravs += dx;
+		Message("yTravs " + yTravs + "dx " + dx + "dy " + dy);
+		
+	}
+	else
+	{
+		if (dx < 0)
+			yTravs += dx / 2;
+		else
+			yTravs += (1 + dx) / 2;
+		xTravs += dx;
+	}
+	
+	if ( yTravs > 0 )
+		bl += "2" + yTravs;
+	else if (yTravs < 0)
+		bl += "5" + (yTravs * -1);
+
+	if ( xTravs > 0 )
+		bl += "4" + xTravs;
+	else if (xTravs < 0)
+		bl += "1" + (xTravs * -1);
+
+	return bl;
+}
+
+string MakeRect(string str)
+{
+	MapperMap@ map = GetActiveMap();
+	if (!valid(map))
+		return "";
+
+	array<MapperObject@> objs;
+	uint count = GetSelectedObjects(objs);
+	
+	array<string@> vals = split(str," ");	
+
+	int x = 0;
+	int y = 0;
+	int tx = 0;
+	int ty = 0;
+	if (vals.length() < 1|| !StrToInt(vals[0], x)) 
+		return "Add x value";	
+    if (vals.length() < 2  || !StrToInt(vals[1], y)) 
+		return "Add y value";
+	if (vals.length() < 3|| !StrToInt(vals[2], tx)) 
+		return "Add tx value";	
+    if (vals.length() < 4  || !StrToInt(vals[3], ty)) 
+		return "Add ty value";
+
+	if (tx < x)
+	{
+		int tmp = tx;
+		tx = x;
+		x = tmp;
+	}
+	
+	if (ty < y)
+	{
+		int tmp = ty;
+		ty = y;
+		y = tmp;
+	}
+
+	int segX = ceil( float(tx - x - 2)  / 4.0 );
+	if ( segX < 1 )
+		segX = 1;
+
+	int segY = ceil( float(ty - y - 2)  / 4.0 );
+	if ( segY < 1 )
+		segY = 1;
+	
+
+	//NESW Corners
+	map.AddObject( x, y, MAP_OBJECT_ITEM, 24500);
+	map.AddObject( x, y + 2 + segY * 4, MAP_OBJECT_ITEM, 24501);
+	map.AddObject( x + 2 + segX * 4, y + 2 + segY * 4, MAP_OBJECT_ITEM, 24502);
+	map.AddObject( x + 2 + segX * 4, y, MAP_OBJECT_ITEM, 24503);
+
+	int Offset = 0;
+	if ( x & 1 == 1)
+		Offset = 1;
+	//WallSegments
+	for ( uint i = 0; i < segX ; i++)
+	{
+		map.AddObject( x+ 1 + (i+1) * 4 , y - Offset , MAP_OBJECT_ITEM, 24511);
+		map.AddObject( x+ 1 + (i+1) * 4 , y + 2 + segY * 4 - Offset, MAP_OBJECT_ITEM, 24511);
+	}
+
+	for ( uint i = 0; i < segY ; i++)
+	{
+		map.AddObject( x , y + 2 + 4 * i , MAP_OBJECT_ITEM, 24510);
+		map.AddObject( x + 2 + segX * 4 , y + 2 + 4 * i , MAP_OBJECT_ITEM, 24510);
+	}
+
+	return "";
+}
+
+//Y = Corners2 + 4*seg    
+//x = Corner2 + 4seg 
+
+string winterize (string str)
+{
+	string list = dirlist("./wintertiles");
+	array<string@> files = split(list, "\n");
+
+	dictionary newtiles;
+	for (uint i = 0, l = files.length(); i < l; i++)
+	{
+		string basename = strlwr(substring(files[i], 0, files[i].length() - 4));
+		newtiles.set(basename, files[i]);
+	}
+
+	string maplist = dirlist("../../server/maps/summer");
+	
+	array<string@> maps = split(maplist, "\n");
+	for (uint i = 0, l = maps.length(); i < l; i++)
+	{
+		if ( substring( maps[i], maps[i].length()-1 , 1) == "b" )
+			continue;
+
+		bool change = false;
+		//Message(maps[i]);
+		string mapstr = "";
+		file f;
+		if (f.open("../../server/maps/summer/" + maps[i], "r") >= 0)
+		{	
+			bool startTiles = false;
+			while (! f.isEndOfFile())
+			{
+				string line;
+				f.readLine(line);
+
+				if ( substring(line,0,7) == "[Tiles]")
+				{
+					mapstr += line;				
+					startTiles = true;
+					continue;
+				}
+				else if ( substring(line,0,9) == "[Objects]")
+					startTiles = false;
+
+				if ( !startTiles ) 
+				{
+					mapstr += line;
+					continue;
+				}
+
+				if ( substring(line, 0, 4) == "tile")
+				{
+					int start = findFirst( line, "art\\tiles\\" );
+					int end = findFirst( line, "." );					
+
+					string tileName = strlwr(substring(line, start + 10 ,  end - start - 10));
+					string replaceName;
+					//Message( substring(line, 0,  start + 10) );
+					if ( newtiles.get( tileName, replaceName ) )
+					{
+						mapstr += substring(line, 0,  start + 10) + replaceName + "\n";
+						change = true;
+					}
+					else
+						mapstr += line;
+				}
+				else
+					mapstr += line;
+				
+			}
+			f.close();
+		}	
+		
+		if ( change )
+			if ( f.open("../../server/maps/winter/" + maps[i], "w") >= 0 )
+			{
+				f.writeString(mapstr);
+				f.close();
+				Message( "../../server/maps/winter/" + maps[i] );
+			}
+	}
+	return "done";
+}
+
+string unwinterize (string str)
+{
+	string list = dirlist("./wintertiles");
+	array<string@> files = split(list, "\n");
+
+	dictionary newtiles;
+	for (uint i = 0, l = files.length(); i < l; i++)
+	{
+		string basename = strlwr(substring(files[i], 0, files[i].length() - 4));
+		string originalName = substring(files[i], 0, files[i].length() - 4) + ".frm" ;
+		newtiles.set(basename, originalName);
+	}
+
+	string maplist = dirlist("../../server/maps/winter");
+	
+	array<string@> maps = split(maplist, "\n");
+	for (uint i = 0, l = maps.length(); i < l; i++)
+	{
+		if ( substring( maps[i], maps[i].length()-1 , 1) == "b" )
+			continue;
+
+		bool change = false;
+		//Message(maps[i]);
+		string mapstr = "";
+		file f;
+		if (f.open("../../server/maps/winter/" + maps[i], "r") >= 0)
+		{	
+			bool startTiles = false;
+			while (! f.isEndOfFile())
+			{
+				string line;
+				f.readLine(line);
+
+				if ( substring(line,0,7) == "[Tiles]")
+				{
+					mapstr += line;				
+					startTiles = true;
+					continue;
+				}
+				else if ( substring(line,0,9) == "[Objects]")
+					startTiles = false;
+
+				if ( !startTiles ) 
+				{
+					mapstr += line;
+					continue;
+				}
+
+				if ( substring(line, 0, 4) == "tile")
+				{
+					int start = findFirst( line, "art\\tiles\\" );
+					int end = findFirst( line, "." );					
+
+					string tileName = strlwr(substring(line, start + 10 ,  end - start - 10));
+					string replaceName;
+					//Message( substring(line, 0,  start + 10) );
+					if ( newtiles.get( tileName, replaceName ) )
+					{
+						mapstr += substring(line, 0,  start + 10) + replaceName + "\n";
+						change = true;
+					}
+					else
+						mapstr += line;
+				}
+				else
+					mapstr += line;
+				
+			}
+			f.close();
+		}	
+		
+		if ( change )
+			if ( f.open("../../server/maps/summer/" + maps[i], "w") >= 0 )
+			{
+				f.writeString(mapstr);
+				f.close();
+				Message( "../../server/maps/summer/" + maps[i] );
+			}
+	}
+	return "done";
+}
+
+string FreePID( string str )
+{
+	for(uint i = 1; i < 30000; i++)
+	{
+		ProtoItem@ proto = GetProtoItem(i);
+		if( !valid(proto))
+			return  "FREE PID:" + i;
+	}
+	return "what";
+}
