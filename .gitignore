@@ -1,0 +1,8 @@
+# Ignore databases
+/source/database/
+
+# Ignore deprecated folder
+deprecated/
+
+# Imported translations (automatically generated from CSV files)
+*.translation
