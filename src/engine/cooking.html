@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<body style="margin: 0; overflow: hidden; background: #1a1a2e;">
+    <canvas id="hexCanvas"></canvas>
+
+    <script>
+        // --- THE MATH (Copied from your hexMath.js) ---
+        const HEX_WIDTH = 32;
+        const HEX_LINE_HEIGHT = 12;
+        const HEX_HEIGHT = 16;
+
+        function hexToPixel(hx, hy) {
+            let x = hx * HEX_WIDTH;
+            const y = hy * HEX_LINE_HEIGHT;
+            if (hy % 2 !== 0) x += HEX_WIDTH / 2;
+            return { x, y };
+        }
+
+        function getHexVertices(hx, hy) {
+            const { x, y } = hexToPixel(hx, hy);
+            const halfH = HEX_LINE_HEIGHT / 2; // 6px
+            const indent = 12; // 2:1 ratio indent
+            return [
+                { x: x + indent, y: y },
+                { x: x + HEX_WIDTH - indent, y: y },
+                { x: x + HEX_WIDTH, y: y + halfH },
+                { x: x + HEX_WIDTH - indent, y: y + HEX_LINE_HEIGHT },
+                { x: x + indent, y: y + HEX_LINE_HEIGHT },
+                { x: x, y: y + halfH }
+            ];
+        }
+
+        function pixelToHex(px, py) {
+            let hy = Math.floor(py / HEX_LINE_HEIGHT);
+            let hx = (hy % 2 === 0) ? Math.floor(px / HEX_WIDTH) : Math.floor((px - HEX_WIDTH / 2) / HEX_WIDTH);
+            
+            // Refinement logic
+            const candidates = [{ hx, hy }, { hx: hx - 1, hy }, { hx: hx + 1, hy }, { hx, hy: hy - 1 }, { hx, hy: hy + 1 }, { hx: hx - 1, hy: hy - 1 }, { hx: hx + 1, hy: hy - 1 }, { hx: hx - 1, hy: hy + 1 }, { hx: hx + 1, hy: hy + 1 }];
+            let closest = candidates[0];
+            let minDist = Infinity;
+            candidates.forEach(c => {
+                const pos = hexToPixel(c.hx, c.hy);
+                const cx = pos.x + HEX_WIDTH / 2;
+                const cy = pos.y + HEX_HEIGHT / 2;
+                const dist = Math.pow(px - cx, 2) + Math.pow(py - cy, 2);
+                if (dist < minDist) { minDist = dist; closest = c; }
+            });
+            return closest;
+        }
+
+        // --- THE RENDERER ---
+        const canvas = document.getElementById('hexCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let mouseHex = { hx: -1, hy: -1 };
+
+        canvas.addEventListener('mousemove', (e) => {
+            mouseHex = pixelToHex(e.clientX, e.clientY);
+            draw();
+        });
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let hy = 0; hy < 30; hy++) {
+                for (let hx = 0; hx < 30; hx++) {
+                    const verts = getHexVertices(hx, hy);
+                    ctx.beginPath();
+                    ctx.moveTo(verts[0].x, verts[0].y);
+                    verts.forEach(v => ctx.lineTo(v.x, v.y));
+                    ctx.closePath();
+
+                    if (hx === mouseHex.hx && hy === mouseHex.hy) {
+                        ctx.fillStyle = 'rgba(46, 139, 87, 0.8)';
+                        ctx.fill();
+                    }
+                    ctx.strokeStyle = '#3f3f5a';
+                    ctx.stroke();
+                }
+            }
+        }
+        draw();
+    </script>
+</body>
+</html>
