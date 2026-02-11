@@ -1,6 +1,13 @@
 # Ignore databases
 /source/database/
 
+# Ignore audit files (internal use only)
+AUDIT.md
+CHANGELOG_ENTRY_v0.4.0.md
+
+# Ignore legacy server files (reference only)
+legacy/
+
 # Ignore my skills
 .agent/*
 

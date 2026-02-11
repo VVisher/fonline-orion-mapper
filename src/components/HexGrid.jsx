@@ -1,21 +1,47 @@
-import React, { useRef, useEffect, useCallback } from 'react';
-import { Application, Graphics, Container } from 'pixi.js';
+
+import React, { useRef, useEffect, useCallback, memo } from 'react';
+import { Application, Container } from 'pixi.js';
 import {
   HEX_WIDTH, HEX_HEIGHT, HEX_LINE_HEIGHT,
-  hexToPixel, pixelToHex, getHexVertices,
+  hexToPixel, pixelToHex, getHexVertices
 } from '../engine/hexMath.js';
 
-const GRID_COLOR = 0x445566;
-const GRID_ALPHA = 0.35;
-const HOVER_COLOR = 0x00ff88;
-const HOVER_ALPHA = 0.35;
-const SELECT_COLOR = 0xffcc00;
-const SELECT_ALPHA = 0.45;
-const OBJ_SCENERY_COLOR = 0x4488ff;
-const OBJ_ITEM_COLOR = 0xff8844;
-const OBJ_CRITTER_COLOR = 0xff4444;
-const TILE_COLOR = 0x335533;
-const TILE_ALPHA = 0.25;
+import {
+  renderGridLayer,
+  renderTileLayer,
+  renderObjectLayer,
+  renderOverlayLayer
+} from './hexgrid/HexGridLayers.js';
+import {
+  renderGridLayerVTS,
+  renderTileLayerVTS,
+  renderObjectLayerVTS
+} from './hexgrid/VirtualTileSystem.js';
+import { useHexGridEvents } from './hexgrid/useHexGridEvents.js';
+
+// Nuclear optimizations
+import { LightweightRenderer } from '../renderer/LightweightRenderer.js';
+import { LODSystem } from '../renderer/LODSystem.js';
+import { BinaryMapFormat } from '../serialization/BinaryMapFormat.js';
+
+// Object color constants
+const OBJ_COLORS = {
+  0: 0xff6b6b, // Critters - red
+  1: 0x4ecdc4, // Items - cyan
+  2: 0x45b7d1, // Scenery - blue
+  8: 0xf9ca24, // Scenery alt - yellow
+  9: 0xf0932b, // Scenery alt 2 - orange
+  10: 0xeb4d4b, // Doors - red
+  11: 0x6ab04c, // Blockers - green
+  12: 0xc44569, // Critters alt - pink
+  13: 0x786fa6, // Walls - purple
+  default: 0x00ff88, // Default green
+};
+import { useHexCamera } from './hexgrid/useHexCamera.js';
+import { useHexCursor } from './hexgrid/useHexCursor.js';
+import { useThrottle, usePerformanceMonitor, useRAFScheduler, useDebounce } from './hexgrid/usePerformance.js';
+
+
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4.0;
@@ -45,6 +71,14 @@ function getVisibleHexRange(cam, canvasW, canvasH, maxHexX, maxHexY) {
  * HexGrid - PixiJS-based hex grid renderer with camera controls.
  */
 export default function HexGrid({ mapState, history, width = 800, height = 600 }) {
+  // Don't render if mapState is not ready
+  if (!mapState || !mapState.header) {
+    return (
+      <div style={{ width, height, background: '#1a1a2e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
+        Initializing map...
+      </div>
+    );
+  }
   const containerRef = useRef(null);
   const appRef = useRef(null);
   const worldRef = useRef(null);
@@ -53,7 +87,6 @@ export default function HexGrid({ mapState, history, width = 800, height = 600 }
   const objectLayerRef = useRef(null);
   const overlayLayerRef = useRef(null);
   const showGridRef = useRef(true);
-  const cameraRef = useRef({ x: 0, y: 0, zoom: 1.0 });
   const keysRef = useRef(new Set());
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0, camX: 0, camY: 0 });
@@ -62,6 +95,38 @@ export default function HexGrid({ mapState, history, width = 800, height = 600 }
   mapStateRef.current = mapState;
   const historyRef = useRef(history);
   historyRef.current = history;
+
+  // Use modular hooks for camera and cursor management
+  const { cameraRef, setCamera, moveCamera, setZoom } = useHexCamera({ x: 0, y: 0, zoom: 1.0 });
+  const { setCursorByTool } = useHexCursor(appRef);
+  
+  // Nuclear optimization refs
+  const lightweightRendererRef = useRef(null);
+  const lodSystemRef = useRef(null);
+  const binaryFormatRef = useRef(new BinaryMapFormat());
+  const useLightweightRendererRef = useRef(false);
+  
+  // Performance optimizations
+  const { startRender, endRender, getMetrics } = usePerformanceMonitor();
+  const { schedule: scheduleRAF } = useRAFScheduler();
+  const throttledRedraw = useThrottle(() => {
+    const startTime = startRender();
+    redrawGrid();
+    endRender(startTime);
+  }, 16); // 60 FPS throttling
+  
+  // Debounced tile/object redraws for performance
+  const debouncedRedrawTiles = useDebounce(() => {
+    const startTime = startRender();
+    redrawTiles();
+    endRender(startTime);
+  }, 8); // 120 FPS for tiles
+  
+  const debouncedRedrawObjects = useDebounce(() => {
+    const startTime = startRender();
+    redrawObjects();
+    endRender(startTime);
+  }, 8);
 
   // Initialize PixiJS
   useEffect(() => {
@@ -86,6 +151,41 @@ export default function HexGrid({ mapState, history, width = 800, height = 600 }
       app.canvas.style.cursor = 'crosshair';
 
       appRef.current = app;
+
+      // Initialize nuclear optimizations
+      lodSystemRef.current = new LODSystem();
+      
+      // Create lightweight renderer canvas
+      const lightweightCanvas = document.createElement('canvas');
+      lightweightCanvas.width = width;
+      lightweightCanvas.height = height;
+      lightweightCanvas.style.position = 'absolute';
+      lightweightCanvas.style.top = '0';
+      lightweightCanvas.style.left = '0';
+      lightweightCanvas.style.display = 'none'; // Hidden by default
+      lightweightCanvas.style.pointerEvents = 'none';
+      container.appendChild(lightweightCanvas);
+      
+      lightweightRendererRef.current = new LightweightRenderer(lightweightCanvas);
+      
+      // Auto-switch to lightweight renderer for performance
+      const checkPerformance = () => {
+        const fps = lightweightRendererRef.current?.getFPS() || 60;
+        if (fps < 30 && !useLightweightRendererRef.current) {
+          console.log('🚀 Switching to lightweight renderer for better performance');
+          useLightweightRendererRef.current = true;
+          app.canvas.style.display = 'none';
+          lightweightCanvas.style.display = 'block';
+        } else if (fps >= 50 && useLightweightRendererRef.current) {
+          console.log('🎨 Switching back to PixiJS renderer');
+          useLightweightRendererRef.current = false;
+          app.canvas.style.display = 'block';
+          lightweightCanvas.style.display = 'none';
+        }
+      };
+      
+      // Check performance every 2 seconds
+      setInterval(checkPerformance, 2000);
 
       const world = new Container();
       worldRef.current = world;
@@ -114,15 +214,18 @@ export default function HexGrid({ mapState, history, width = 800, height = 600 }
           ms.header.WorkHexX || 100,
           ms.header.WorkHexY || 100,
         );
-        cameraRef.current.x = workPx.x - width / 2;
-        cameraRef.current.y = workPx.y - height / 2;
+        setCamera(workPx.x - width / 2, workPx.y - height / 2);
       }
 
-      redrawTiles();
-      redrawObjects();
-      redrawGrid();
-      redrawOverlay();
-      applyCamera();
+      // Delay initial redraw to ensure all refs are set
+      setTimeout(() => {
+        if (cancelled) return; // Don't redraw if component unmounted
+        if (tileLayerRef.current && ms) redrawTiles();
+        if (objectLayerRef.current && ms) redrawObjects();
+        if (gridLayerRef.current && ms) redrawGrid();
+        if (overlayLayerRef.current && ms) redrawOverlay();
+        applyCamera();
+      }, 0);
     }).catch((err) => {
       console.error('[ORION] PixiJS init failed:', err);
     });
@@ -139,16 +242,24 @@ export default function HexGrid({ mapState, history, width = 800, height = 600 }
     };
   }, []);
 
-  // Subscribe to mapState changes
+  // Subscribe to mapState changes (optimized)
   useEffect(() => {
     if (!mapState) return;
     const unsub = mapState.subscribe(() => {
-      redrawTiles();
-      redrawObjects();
+      debouncedRedrawTiles();
+      debouncedRedrawObjects();
       redrawOverlay();
     });
     return unsub;
-  }, [mapState]);
+  }, [mapState, debouncedRedrawTiles, debouncedRedrawObjects]);
+
+  // Update cursor when tool changes
+  useEffect(() => {
+    const ms = mapStateRef.current;
+    if (ms) {
+      setCursorByTool(ms.activeTool);
+    }
+  }, [mapState?.activeTool, setCursorByTool]);
 
   // Keyboard handling
   useEffect(() => {
@@ -178,30 +289,30 @@ export default function HexGrid({ mapState, history, width = 800, height = 600 }
     };
   }, []);
 
-  // Animation loop for keyboard panning + grid redraw
+  // Animation loop for keyboard panning + grid redraw (optimized)
   useEffect(() => {
     let rafId;
     const tick = () => {
       const keys = keysRef.current;
       let moved = false;
       const speed = PAN_SPEED / cameraRef.current.zoom;
-      if (keys.has('ArrowLeft') || keys.has('a')) { cameraRef.current.x -= speed; moved = true; }
-      if (keys.has('ArrowRight') || keys.has('d')) { cameraRef.current.x += speed; moved = true; }
-      if (keys.has('ArrowUp') || keys.has('w')) { cameraRef.current.y -= speed; moved = true; }
-      if (keys.has('ArrowDown') || keys.has('s')) { cameraRef.current.y += speed; moved = true; }
+      if (keys.has('ArrowLeft') || keys.has('a')) { moveCamera(-speed, 0); moved = true; }
+      if (keys.has('ArrowRight') || keys.has('d')) { moveCamera(speed, 0); moved = true; }
+      if (keys.has('ArrowUp') || keys.has('w')) { moveCamera(0, -speed); moved = true; }
+      if (keys.has('ArrowDown') || keys.has('s')) { moveCamera(0, speed); moved = true; }
       if (moved) {
         needsGridRedrawRef.current = true;
         applyCamera();
       }
       if (needsGridRedrawRef.current) {
         needsGridRedrawRef.current = false;
-        redrawGrid();
+        throttledRedraw();
       }
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, []);
+  }, [moveCamera, throttledRedraw]);
 
   function applyCamera() {
     const world = worldRef.current;
@@ -221,210 +332,148 @@ export default function HexGrid({ mapState, history, width = 800, height = 600 }
 
   // ---- Drawing functions ----
 
-  function hexFlatCoords(hx, hy) {
-    const verts = getHexVertices(hx, hy);
-    const flat = [];
-    for (const v of verts) { flat.push(v.x, v.y); }
-    return flat;
-  }
 
+  // --- Modular rendering layer calls ---
   function redrawGrid() {
-    const layer = gridLayerRef.current;
-    if (!layer) return;
-    layer.removeChildren();
-
-    const ms = mapStateRef.current;
-    if (!ms) return;
-    const maxX = ms.header.MaxHexX || 200;
-    const maxY = ms.header.MaxHexY || 200;
-
-    const range = getVisibleHexRange(cameraRef.current, width, height, maxX, maxY);
-    const g = new Graphics();
-
-    for (let hy = range.minHy; hy < range.maxHy; hy++) {
-      for (let hx = range.minHx; hx < range.maxHx; hx++) {
-        g.poly(hexFlatCoords(hx, hy));
-        g.stroke({ width: 0.5, color: GRID_COLOR, alpha: GRID_ALPHA });
+    try {
+      const ms = mapStateRef.current;
+      if (!ms) return;
+      
+      // Use lightweight renderer if enabled
+      if (useLightweightRendererRef.current && lightweightRendererRef.current) {
+        lightweightRendererRef.current.render(
+          ms.tiles,
+          ms.objects,
+          ms.selectedObjects || [],
+          showGridRef.current
+        );
+        return;
       }
+      
+      // Fall back to PixiJS renderer
+      const layer = gridLayerRef.current;
+      if (!layer) return;
+      
+      renderGridLayerVTS(
+        layer,
+        cameraRef.current,
+        width,
+        height,
+        ms.header.MaxHexX || 200,
+        ms.header.MaxHexY || 200,
+        getHexVertices
+      );
+    } catch (error) {
+      console.error('[ORION] Error in redrawGrid:', error);
     }
-
-    layer.addChild(g);
   }
 
   function redrawTiles() {
-    const layer = tileLayerRef.current;
-    const ms = mapStateRef.current;
-    if (!layer || !ms) return;
-    layer.removeChildren();
-
-    if (ms.tiles.length === 0) return;
-
-    const g = new Graphics();
-    for (const tile of ms.tiles) {
-      g.poly(hexFlatCoords(tile.hexX, tile.hexY));
-      g.fill({ color: TILE_COLOR, alpha: TILE_ALPHA });
+    try {
+      const layer = tileLayerRef.current;
+      const ms = mapStateRef.current;
+      if (!layer || !ms) return;
+      
+      // Don't render tiles if tiles layer is hidden
+      if (ms.layerVisibility?.tiles === false) {
+        layer.removeChildren();
+        return;
+      }
+      
+      renderTileLayerVTS(
+        layer,
+        ms.tiles,
+        cameraRef.current,
+        width,
+        height,
+        ms.header.MaxHexX || 200,
+        ms.header.MaxHexY || 200,
+        getHexVertices,
+        0x2a7858, // Teal color
+        0.8
+      );
+    } catch (error) {
+      console.error('[ORION] Error in redrawTiles:', error);
     }
-    layer.addChild(g);
   }
 
   function redrawObjects() {
-    const layer = objectLayerRef.current;
-    const ms = mapStateRef.current;
-    if (!layer || !ms) return;
-    layer.removeChildren();
-
-    // Sort by Y then X for z-ordering
-    const sorted = ms.objects
-      .map((obj, idx) => ({ obj, idx }))
-      .sort((a, b) => (a.obj.MapY - b.obj.MapY) || (a.obj.MapX - b.obj.MapX));
-
-    const gObj = new Graphics();
-    const gSel = new Graphics();
-
-    for (const { obj, idx } of sorted) {
-      let color;
-      switch (obj.MapObjType) {
-        case 0: color = OBJ_CRITTER_COLOR; break;
-        case 1: color = OBJ_ITEM_COLOR; break;
-        case 2: default: color = OBJ_SCENERY_COLOR; break;
+    try {
+      const layer = objectLayerRef.current;
+      const ms = mapStateRef.current;
+      if (!layer || !ms) {
+        console.log('🔍 redrawObjects: No layer or mapState');
+        return;
       }
-
-      gObj.poly(hexFlatCoords(obj.MapX, obj.MapY));
-      gObj.fill({ color, alpha: 0.5 });
-
-      if (ms.selectedObjects.includes(idx)) {
-        gSel.poly(hexFlatCoords(obj.MapX, obj.MapY));
-        gSel.stroke({ width: 2, color: SELECT_COLOR, alpha: 1 });
-      }
+      
+      console.log('🔍 redrawObjects called:', {
+        hasLayer: !!layer,
+        hasMapState: !!ms,
+        objectCount: ms.objects?.length || 0,
+        selectedCount: ms.selectedObjects?.length || 0,
+        activeLayer: ms.activeLayer,
+        camera: cameraRef.current
+      });
+      
+      renderObjectLayerVTS(
+        layer,
+        ms.objects,
+        ms.selectedObjects || [],
+        cameraRef.current,
+        width,
+        height,
+        ms.header.MaxHexX || 200,
+        ms.header.MaxHexY || 200,
+        getHexVertices,
+        OBJ_COLORS,
+        0xffaa00,
+        ms.activeLayer
+      );
+    } catch (error) {
+      console.error('[ORION] Error in redrawObjects:', error);
     }
-
-    layer.addChild(gObj);
-    layer.addChild(gSel);
   }
 
   function redrawOverlay() {
-    const layer = overlayLayerRef.current;
-    const ms = mapStateRef.current;
-    if (!layer || !ms) return;
-    layer.removeChildren();
-
-    if (ms.hoveredHex) {
-      const g = new Graphics();
-      g.poly(hexFlatCoords(ms.hoveredHex.hx, ms.hoveredHex.hy));
-      g.fill({ color: HOVER_COLOR, alpha: HOVER_ALPHA });
-      layer.addChild(g);
-    }
-
-    if (ms.selectedHex) {
-      const g = new Graphics();
-      g.poly(hexFlatCoords(ms.selectedHex.hx, ms.selectedHex.hy));
-      g.stroke({ width: 2, color: SELECT_COLOR, alpha: SELECT_ALPHA });
-      layer.addChild(g);
+    try {
+      const layer = overlayLayerRef.current;
+      const ms = mapStateRef.current;
+      if (!layer || !ms) return;
+      layer.removeChildren();
+      renderOverlayLayer({
+        layer,
+        hoveredHex: ms.hoveredHex,
+        selectedHex: ms.selectedHex,
+        getHexVertices
+      });
+    } catch (error) {
+      console.error('[ORION] Error in redrawOverlay:', error);
     }
   }
 
-  // ---- Event handlers ----
 
-  const onWheel = useCallback((e) => {
-    e.preventDefault();
-    const cam = cameraRef.current;
-    const oldZoom = cam.zoom;
-    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
-    cam.zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, cam.zoom + delta));
-
-    const rect = containerRef.current.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    const worldBefore = { x: mx / oldZoom + cam.x, y: my / oldZoom + cam.y };
-    const worldAfter = { x: mx / cam.zoom + cam.x, y: my / cam.zoom + cam.y };
-    cam.x -= (worldAfter.x - worldBefore.x);
-    cam.y -= (worldAfter.y - worldBefore.y);
-
-    needsGridRedrawRef.current = true;
-    applyCamera();
-  }, []);
-
-  const onMouseDown = useCallback((e) => {
-    if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
-      isPanningRef.current = true;
-      panStartRef.current = {
-        x: e.clientX, y: e.clientY,
-        camX: cameraRef.current.x, camY: cameraRef.current.y,
-      };
-      e.preventDefault();
-    } else if (e.button === 0) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const sx = e.clientX - rect.left;
-      const sy = e.clientY - rect.top;
-      const wp = screenToWorld(sx, sy);
-      const hex = pixelToHex(wp.x, wp.y);
-
-      const ms = mapStateRef.current;
-      if (!ms) return;
-
-      if (ms.activeTool === 'tile' && ms.tileBrush) {
-        const shortName = ms.tileBrush.split('\\').pop().replace('.frm', '');
-        if (historyRef.current) historyRef.current.push(`Tile ${shortName} @(${hex.hx},${hex.hy})`);
-        ms.removeTileAt(hex.hx, hex.hy);
-        ms.addTile(hex.hx, hex.hy, ms.tileBrush);
-        redrawTiles();
-      } else if (ms.activeTool === 'erase') {
-        if (historyRef.current) historyRef.current.push(`Erase @(${hex.hx},${hex.hy})`);
-        ms.removeTileAt(hex.hx, hex.hy);
-        redrawTiles();
-      } else {
-        const clickedIdx = findObjectAtHex(hex.hx, hex.hy);
-        if (clickedIdx >= 0) {
-          ms.selectObject(clickedIdx, e.ctrlKey);
-          ms.setSelectedHex(hex);
-        } else {
-          ms.clearSelection();
-          ms.setSelectedHex(hex);
-        }
-      }
-    } else if (e.button === 2) {
-      // Right-click: erase tile at hex
-      const rect = containerRef.current.getBoundingClientRect();
-      const sx = e.clientX - rect.left;
-      const sy = e.clientY - rect.top;
-      const wp = screenToWorld(sx, sy);
-      const hex = pixelToHex(wp.x, wp.y);
-      const ms = mapStateRef.current;
-      if (ms) {
-        if (historyRef.current) historyRef.current.push(`Erase @(${hex.hx},${hex.hy})`);
-        ms.removeTileAt(hex.hx, hex.hy);
-        redrawTiles();
-      }
-    }
-  }, []);
-
-  const onMouseMove = useCallback((e) => {
-    if (isPanningRef.current) {
-      const dx = e.clientX - panStartRef.current.x;
-      const dy = e.clientY - panStartRef.current.y;
-      cameraRef.current.x = panStartRef.current.camX - dx / cameraRef.current.zoom;
-      cameraRef.current.y = panStartRef.current.camY - dy / cameraRef.current.zoom;
-      needsGridRedrawRef.current = true;
-      applyCamera();
-      return;
-    }
-
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const sx = e.clientX - rect.left;
-    const sy = e.clientY - rect.top;
-    const wp = screenToWorld(sx, sy);
-    const hex = pixelToHex(wp.x, wp.y);
-
-    const ms = mapStateRef.current;
-    if (ms) {
-      ms.setHoveredHex(hex);
-    }
-  }, []);
-
-  const onMouseUp = useCallback(() => {
-    isPanningRef.current = false;
-  }, []);
+  // --- Use modular event/tool logic hook ---
+  const {
+    onWheel,
+    onMouseDown,
+    onMouseMove,
+    onMouseUp,
+    onKeyDown
+  } = useHexGridEvents({
+    containerRef,
+    cameraRef,
+    mapStateRef,
+    historyRef,
+    redrawTiles,
+    redrawObjects,
+    redrawOverlay,
+    needsGridRedrawRef,
+    applyCamera,
+    screenToWorld,
+    findObjectAtHex,
+    panStartRef,
+    isPanningRef
+  });
 
   function findObjectAtHex(hx, hy) {
     const ms = mapStateRef.current;
@@ -436,16 +485,35 @@ export default function HexGrid({ mapState, history, width = 800, height = 600 }
     return -1;
   }
 
+  // Add wheel event listener manually to fix passive issue
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const handleWheel = (e) => {
+      e.preventDefault(); // Call preventDefault here instead
+      onWheel(e);
+    };
+    
+    // Add non-passive wheel event listener
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [onWheel]);
+
   return (
     <div
       ref={containerRef}
-      onWheel={onWheel}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
+      onKeyDown={onKeyDown}
       onContextMenu={(e) => e.preventDefault()}
       style={{ width, height, overflow: 'hidden' }}
+      tabIndex={0} // Make div focusable for keyboard events
     />
   );
 }

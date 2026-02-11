@@ -1,13 +1,22 @@
 {
-  "name": "orion-fomap-architect",
+  "name": "orion-fomap-assigned-pointer",
   "version": "0.1.0",
-  "description": "ORION: FOnline Map Architect - Procedural-assisted map creation suite",
+  "description": "ORION: FOnline Map Assigned Pointer - Procedural-assisted map creation suite",
   "main": "electron/main.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "update-status": "node scripts/update-status.js",
+    "parse-protos": "node scripts/parse-all-protos.js",
+    "build-proto-db": "node scripts/build-proto-db.js",
+    "serialize-protos": "node scripts/proto-serializer.js serialize",
+    "verify-protos": "node scripts/proto-serializer.js verify",
+    "proto-workflow": "node scripts/proto-workflow.js run",
+    "proto-status": "node scripts/proto-workflow.js status",
+    "proto-clean": "node scripts/proto-workflow.js clean",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "vite build && electron-builder"
   },
@@ -17,8 +26,10 @@
     "fomap"
   ],
   "license": "MIT",
-  "type": "module",
   "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "glob": "^13.0.2",
+    "lucide-react": "^0.563.0",
     "pixi.js": "^8.16.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"

@@ -1,6 +1,6 @@
 # ORION: FOnline Map Architect
 
-**ORION** is a standalone, procedural-assisted map creation suite designed to replace the legacy FOnline mapper. Built for designers, not coders.
+**ORION** is a standalone, procedural-assisted map creation suite designed to replace the legacy FOnline mapper. Built for designers, not coders. **Specifically designed for FOnline: Ashes of Phoenix server data parsing and map creation.**
 
 ---
 
@@ -20,13 +20,13 @@
 
 ## Project Vision
 
-ORION transforms FOnline map creation from a technical nightmare into an intuitive, visual workflow. The goal is **zero-code map creation** where users work with visual concepts (Roads, Buildings, Rubble) while the system handles all the hex-offset calculations, proto-stacking, and script-attachment under the hood.
+ORION transforms FOnline: Ashes of Phoenix map creation from a technical nightmare into an intuitive, visual workflow. The goal is **zero-code map creation** where users work with visual concepts (Roads, Buildings, Rubble) while the system handles all the hex-offset calculations, proto-stacking, and script-attachment under the hood.
 
 ### Target Users
 
-- **Primary**: Game designers, level designers, world-builders with **zero coding knowledge**
+- **Primary**: Game designers, level designers, world-builders for **FOnline: Ashes of Phoenix** with **zero coding knowledge**
 - **Secondary**: Modders who want rapid iteration without fighting the legacy mapper
-- **Tertiary**: Server admins who need to quickly generate or modify maps
+- **Tertiary**: FOnline: Ashes of Phoenix server admins who need to quickly generate or modify maps
 
 ---
 
@@ -35,6 +35,8 @@ ORION transforms FOnline map creation from a technical nightmare into an intuiti
 ### Problems with Legacy Mapper
 
 The original FOnline mapper (`fo_mapper.dll`) is a nightmare of:
+
+**Note**: ORION is specifically optimized for **FOnline: Ashes of Phoenix** proto files, scripts, and data structures. While the concepts may apply to other FOnline servers, compatibility is not guaranteed.
 
 - **Signed/unsigned mismatches** in coordinate systems
 - **Obscure script warnings** that require engine knowledge to debug
@@ -93,12 +95,12 @@ The user never sees:
 
 ### 1. Visual Prefab System
 
-**Concept**: Users pick from categorized visual libraries, not raw ProtoIDs.
+**Concept**: Users pick from categorized visual libraries built from **FOnline: Ashes of Phoenix** proto files, not raw ProtoIDs.
 
 **Implementation**:
-- Parse all `.fopro` files to build searchable database
+- Parse all `.fopro` files from **FOnline: Ashes of Phoenix** to build searchable database
 - Generate thumbnail previews from `.fofrm` sprite files
-- Organize into logical categories:
+- Organize into logical categories specific to Ashes of Phoenix:
   - **Terrain**: Floors, Tiles, Ground
   - **Walls & Doors**: Interior/Exterior structures
   - **Furniture**: Tables, Chairs, Lockers, Shelves
@@ -125,7 +127,7 @@ User clicks "Furniture" → "Storage"
 
 ### 2. Procedural Content Generation (PCG)
 
-**Concept**: One-click generation of complex structures using algorithms from `mapper_pcg.fos`.
+**Concept**: One-click generation of complex structures using algorithms from `mapper_pcg.fos` and **FOnline: Ashes of Phoenix** proto configurations.
 
 #### 2.1 Road Generator
 
@@ -169,7 +171,7 @@ function generateRoad(startHex, endHex, roadType, width, options) {
 }
 ```
 
-**ProtoID Mappings** (from `mapper_pcg.fos`):
+**ProtoID Mappings** (from `mapper_pcg.fos` and **Ashes of Phoenix** proto files):
 - Cobblestone: `[7869, 7870, 7871, 7872, 7873, 7874, 7875, 7876, 7877, 7878]`
 - Asphalt: `[2278, 2279, 2280]`
 - Debris: `[2224, 2225, 2226, 2227, 2228, 4523, 4522, 4520, 4521, 4573, 4574, 7003-7007]`
@@ -255,7 +257,7 @@ function generateForest(polygon, density, treeTypes, options) {
 
 ### 3. Smart Object System
 
-**Concept**: Objects that "know" how they should behave, with pre-configured scripts and parameters.
+**Concept**: Objects that "know" how they should behave, with pre-configured **FOnline: Ashes of Phoenix** scripts and parameters.
 
 **Object Categories**:
 
@@ -294,8 +296,8 @@ Computer Terminal:
 **Real-time Checks**:
 - ✓ Objects within map bounds (0-MaxHexX, 0-MaxHexY)
 - ✓ No overlapping collision objects
-- ✓ All ProtoIDs valid (exist in proto database)
-- ✓ Scripts referenced exist in server files
+- ✓ All ProtoIDs valid (exist in **Ashes of Phoenix** proto database)
+- ✓ Scripts referenced exist in **Ashes of Phoenix** server files
 - ✓ Required parameters present (e.g., Item_Val0 for containers)
 - ✓ Offset values reasonable (-100 to +100)
 - ✓ Tile layers don't conflict
@@ -587,9 +589,9 @@ key_down(uint8 key)
 - Expected workflow (tabs for Items, Tiles, Critters, etc.)
 - Hotkey conventions (F1-F10)
 
-#### 6. `proto/*.fopro` - Proto Database
+#### 6. `proto/*.fopro` - **Ashes of Phoenix** Proto Database
 
-**Purpose**: Define all placeable objects in the game.
+**Purpose**: Define all placeable objects in **FOnline: Ashes of Phoenix**.
 
 **File Count**: 60+ files, 1000s of proto entries
 
@@ -616,7 +618,7 @@ Material=1
 - `wall.fopro` - Wall segments
 - etc.
 
-**ORION Database Build**:
+**ORION Database Build** (FOnline: Ashes of Phoenix specific):
 ```javascript
 // Parse all .fopro files into SQLite database:
 CREATE TABLE protos (
@@ -686,19 +688,19 @@ See [TODO.md](./TODO.md) for detailed task breakdown.
 
 **Deliverable**: Interactive hex grid where you can click hexes and see coordinates.
 
-### Phase 3: Proto Database & Prefab Library (2 weeks)
+### Phase 3: **Ashes of Phoenix** Proto Database & Prefab Library (2 weeks)
 
-**Goal**: Build searchable catalog of all game objects.
+**Goal**: Build searchable catalog of all **FOnline: Ashes of Phoenix** game objects.
 
 **Tasks**:
-- [ ] Parse all `.fopro` files
+- [ ] Parse all **Ashes of Phoenix** `.fopro` files
 - [ ] Extract ProtoID, Type, PicMap, Flags
-- [ ] Categorize by filename and Type
+- [ ] Categorize by filename and Type (AoP-specific categories)
 - [ ] Generate sprite thumbnails from `.fofrm` files
-- [ ] Build search/filter UI
-- [ ] Tag system (manual or AI-generated)
+- [ ] Build search/filter UI for AoP content
+- [ ] Tag system (manual or AI-generated for AoP items)
 
-**Deliverable**: Searchable library where user can browse and pick objects.
+**Deliverable**: Searchable library where user can browse and pick **FOnline: Ashes of Phoenix** objects.
 
 ### Phase 4: Basic Map Editing (2 weeks)
 
@@ -734,8 +736,8 @@ See [TODO.md](./TODO.md) for detailed task breakdown.
 
 **Tasks**:
 - [ ] Bounds checking (objects within map size)
-- [ ] ProtoID validation (exists in database)
-- [ ] Script validation (exists in server files)
+- [ ] ProtoID validation (exists in **Ashes of Phoenix** database)
+- [ ] Script validation (exists in **Ashes of Phoenix** server files)
 - [ ] Collision detection and warnings
 - [ ] Pre-save validation report
 
@@ -747,13 +749,13 @@ See [TODO.md](./TODO.md) for detailed task breakdown.
 
 **Tasks**:
 - [ ] Implement line drawing on hex grid
-- [ ] Road type selector (Cobblestone, Asphalt, Dirt)
+- [ ] Road type selector (Cobblestone, Asphalt, Dirt) - **Ashes of Phoenix specific**
 - [ ] Width adjustment (1-4 hexes)
-- [ ] Randomized tile selection from road ProtoID arrays
+- [ ] Randomized tile selection from **Ashes of Phoenix** road ProtoID arrays
 - [ ] Optional debris placement
 - [ ] Optional side decoration
 
-**Deliverable**: User draws line → road appears with proper tiles and debris.
+**Deliverable**: User draws line → **Ashes of Phoenix** road appears with proper tiles and debris.
 
 ### Phase 8: PCG - Buildings (3 weeks)
 
@@ -761,14 +763,14 @@ See [TODO.md](./TODO.md) for detailed task breakdown.
 
 **Tasks**:
 - [ ] Rectangle drawing tool
-- [ ] Wall placement algorithm
-- [ ] Floor tile filling
-- [ ] Door placement logic
-- [ ] Interior furniture generation
+- [ ] Wall placement algorithm (**Ashes of Phoenix** wall types)
+- [ ] Floor tile filling (**Ashes of Phoenix** floor types)
+- [ ] Door placement logic (**Ashes of Phoenix** doors)
+- [ ] Interior furniture generation (**Ashes of Phoenix** furniture)
 - [ ] Collision-aware object placement
 - [ ] Weathering/damage states
 
-**Deliverable**: User draws rectangle → complete building generated with walls, floors, doors, furniture.
+**Deliverable**: User draws rectangle → complete **Ashes of Phoenix** building generated with walls, floors, doors, furniture.
 
 ### Phase 9: PCG - Forests & Natural Features (2 weeks)
 
@@ -777,12 +779,12 @@ See [TODO.md](./TODO.md) for detailed task breakdown.
 **Tasks**:
 - [ ] Polygon drawing tool
 - [ ] Poisson disk sampling for tree distribution
-- [ ] Tree type selection and mixing
-- [ ] Undergrowth/bush placement
-- [ ] Rock/boulder scattering
+- [ ] Tree type selection and mixing (**Ashes of Phoenix** flora)
+- [ ] Undergrowth/bush placement (**Ashes of Phoenix** vegetation)
+- [ ] Rock/boulder scattering (**Ashes of Phoenix** environmental objects)
 - [ ] Density controls
 
-**Deliverable**: User draws area → forest appears with realistic tree distribution.
+**Deliverable**: User draws area → **Ashes of Phoenix** forest appears with realistic tree distribution.
 
 ### Phase 10: Polish & UX (2-3 weeks)
 
