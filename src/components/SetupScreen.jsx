@@ -5,6 +5,58 @@ import {
 } from '../engine/ProjectConfig.js';
 
 /**
+ * Utility functions for auto-detecting nearby folders
+ */
+
+function getSuggestedClientPath(serverPath) {
+  if (!serverPath) return null;
+  
+  // If we only have the filename (no directory), provide generic guidance
+  if (!serverPath.includes('/') && !serverPath.includes('\\')) {
+    return 'Look for client folder near your server folder';
+  }
+  
+  // Remove the server filename and get directory
+  const serverDir = serverPath.replace(/[^/\\]*$/, '');
+  
+  // Common client folder locations relative to server
+  const suggestions = [
+    `${serverDir}client`,
+    `${serverDir}../client`,
+    `${serverDir}../Client`,
+    `${serverDir}../../client`,
+    `${serverDir}../../Client`,
+  ];
+  
+  return suggestions[0]; // Return the most likely suggestion
+}
+
+function getSuggestedMapPaths(serverPath) {
+  if (!serverPath) return [];
+  
+  // If we only have the filename (no directory), provide generic guidance
+  if (!serverPath.includes('/') && !serverPath.includes('\\')) {
+    return ['Look for maps folder near your server folder'];
+  }
+  
+  // Remove the server filename and get directory
+  const serverDir = serverPath.replace(/[^/\\]*$/, '');
+  
+  // Common map folder locations relative to server
+  const suggestions = [
+    `${serverDir}maps`,
+    `${serverDir}../maps`,
+    `${serverDir}../Maps`,
+    `${serverDir}../../maps`,
+    `${serverDir}../../Maps`,
+    `${serverDir}data/maps`,
+    `${serverDir}../data/maps`,
+  ];
+  
+  return suggestions;
+}
+
+/**
  * SetupScreen — first-launch configuration gate.
  * User must pick valid FonlineServer.cfg and DataFiles.cfg before accessing the mapper.
  *
@@ -13,12 +65,17 @@ import {
  */
 export default function SetupScreen({ onConfigured }) {
   const [config, setConfig] = useState(loadConfig);
+  
+  console.log('🔧 SetupScreen rendering - config:', config);
 
   const [serverStatus, setServerStatus] = useState(null);
   const [clientStatus, setClientStatus] = useState(null);
+  const [suggestedClientPath, setSuggestedClientPath] = useState(null);
+  const [suggestedMapPaths, setSuggestedMapPaths] = useState([]);
 
   const serverInputRef = useRef(null);
   const clientInputRef = useRef(null);
+  const serverFolderInputRef = useRef(null);
 
   const bothValid = config.serverValid && config.clientValid;
 
@@ -35,6 +92,23 @@ export default function SetupScreen({ onConfigured }) {
     };
     setConfig(updated);
     saveConfig(updated);
+
+    // Generate suggestions based on server path
+    if (result.path) {
+      const clientSuggestion = getSuggestedClientPath(result.path);
+      const mapSuggestions = getSuggestedMapPaths(result.path);
+      
+      setSuggestedClientPath(clientSuggestion);
+      setSuggestedMapPaths(mapSuggestions);
+      
+      // Save suggestions to config for later use
+      const configWithSuggestions = {
+        ...updated,
+        mapPaths: mapSuggestions,
+      };
+      setConfig(configWithSuggestions);
+      saveConfig(configWithSuggestions);
+    }
   }
 
   async function onClientFilePicked(e) {
@@ -52,11 +126,68 @@ export default function SetupScreen({ onConfigured }) {
     saveConfig(updated);
   }
 
+  async function onServerFolderPicked(e) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    
+    // Look for FonlineServer.cfg in the selected folder
+    const serverFile = files.find(f => f.name.toLowerCase() === 'fonlineserver.cfg');
+    if (!serverFile) {
+      setServerStatus({ valid: false, reason: 'FonlineServer.cfg not found in selected folder' });
+      return;
+    }
+    
+    const result = await validateServerFile(serverFile);
+    setServerStatus(result);
+
+    // Get the folder path from the first file's webkitRelativePath
+    const folderPath = files[0].webkitRelativePath?.split('/')[0] || 'Selected folder';
+    
+    const updated = {
+      ...config,
+      serverPath: folderPath,
+      serverValid: result.valid,
+    };
+    setConfig(updated);
+    saveConfig(updated);
+
+    // Generate suggestions based on folder path
+    if (folderPath && folderPath !== 'Selected folder') {
+      const clientSuggestion = getSuggestedClientPath(folderPath);
+      const mapSuggestions = getSuggestedMapPaths(folderPath);
+      
+      setSuggestedClientPath(clientSuggestion);
+      setSuggestedMapPaths(mapSuggestions);
+      
+      // Save suggestions to config for later use
+      const configWithSuggestions = {
+        ...updated,
+        mapPaths: mapSuggestions,
+      };
+      setConfig(configWithSuggestions);
+      saveConfig(configWithSuggestions);
+    }
+  }
+
+  function handleUseSuggestedClient() {
+    if (suggestedClientPath && clientInputRef.current) {
+      // Trigger file picker with suggested path (not directly possible, so we show the suggestion)
+      const updated = {
+        ...config,
+        clientPath: suggestedClientPath,
+      };
+      setConfig(updated);
+      // Note: User still needs to pick the actual file, but we guide them
+    }
+  }
+
   function handleReset() {
     clearConfig();
     setConfig(loadConfig());
     setServerStatus(null);
     setClientStatus(null);
+    setSuggestedClientPath(null);
+    setSuggestedMapPaths([]);
     if (serverInputRef.current) serverInputRef.current.value = '';
     if (clientInputRef.current) clientInputRef.current.value = '';
   }
@@ -66,6 +197,8 @@ export default function SetupScreen({ onConfigured }) {
       onConfigured({ ...config });
     }
   }
+
+  console.log('🔧 SetupScreen render - bothValid:', bothValid, 'serverStatus:', serverStatus, 'clientStatus:', clientStatus);
 
   return (
     <div style={styles.root}>
@@ -102,6 +235,64 @@ export default function SetupScreen({ onConfigured }) {
           <p style={styles.detail}>
             Located in your <code>server/</code> folder. Must contain <code>WindowName</code>.
           </p>
+          
+          {/* Alternative: Folder selection for better path detection */}
+          <div style={styles.row}>
+            <input
+              ref={serverFolderInputRef}
+              type="file"
+              accept=".cfg"
+              webkitdirectory=""
+              style={{ display: 'none' }}
+              onChange={onServerFolderPicked}
+            />
+            <button 
+              style={{...styles.btn, background: '#2a2a4e', fontSize: '0.75rem'}} 
+              onClick={() => serverFolderInputRef.current?.click()}
+            >
+              📁 Select Server Folder (Better)
+            </button>
+            <span style={{...styles.path, fontSize: '0.7rem', color: '#666'}}>
+              Enables auto-detection of nearby folders
+            </span>
+          </div>
+          
+          {/* Auto-suggestions */}
+          {suggestedClientPath && (
+            <div style={styles.suggestionBox}>
+              <p style={styles.suggestionTitle}>💡 Suggested client path:</p>
+              <p style={styles.suggestionPath}>{suggestedClientPath}</p>
+              {!suggestedClientPath.includes('Look for') && (
+                <button 
+                  style={styles.suggestionBtn} 
+                  onClick={handleUseSuggestedClient}
+                >
+                  Use this suggestion
+                </button>
+              )}
+              <p style={styles.suggestionNote}>
+                {suggestedClientPath.includes('Look for') 
+                  ? 'Browse to your server folder and look for the client directory nearby'
+                  : 'Look for DataFiles.cfg in this location'
+                }
+              </p>
+            </div>
+          )}
+          
+          {suggestedMapPaths.length > 0 && (
+            <div style={styles.suggestionBox}>
+              <p style={styles.suggestionTitle}>🗺️ Suggested map folders:</p>
+              {suggestedMapPaths.slice(0, 3).map((path, i) => (
+                <p key={i} style={styles.suggestionPath}>{path}</p>
+              ))}
+              <p style={styles.suggestionNote}>
+                {suggestedMapPaths[0].includes('Look for')
+                  ? 'Browse to your server folder and look for maps directories nearby'
+                  : 'These folders will be searched for .fomap files'
+                }
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Client config */}
@@ -252,6 +443,42 @@ const styles = {
     color: '#555',
     fontSize: '0.72rem',
     margin: '6px 0 0',
+  },
+  suggestionBox: {
+    marginTop: 16,
+    padding: '12px',
+    background: '#1a1a3e',
+    border: '1px solid #3a3a6a',
+    borderRadius: 6,
+  },
+  suggestionTitle: {
+    color: '#00ff88',
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    margin: '0 0 8px 0',
+  },
+  suggestionPath: {
+    fontFamily: 'monospace',
+    fontSize: '0.75rem',
+    color: '#aaa',
+    margin: '4px 0',
+    wordBreak: 'break-all',
+  },
+  suggestionBtn: {
+    marginTop: 8,
+    padding: '6px 12px',
+    background: '#00aa55',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 4,
+    cursor: 'pointer',
+    fontSize: '0.75rem',
+  },
+  suggestionNote: {
+    color: '#666',
+    fontSize: '0.7rem',
+    margin: '8px 0 0 0',
+    fontStyle: 'italic',
   },
   actions: {
     display: 'flex',

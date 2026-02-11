@@ -13,6 +13,7 @@ const STORAGE_KEY = 'orion_project_config';
 const DEFAULT_CONFIG = {
   serverPath: '',
   clientPath: '',
+  mapPaths: [], // Array of suggested map folder paths
   serverValid: false,
   clientValid: false,
 };
@@ -47,9 +48,15 @@ export async function validateServerFile(file) {
   }
 
   // Derive server folder path from the file's webkitRelativePath or name
-  const path = file.webkitRelativePath
-    ? file.webkitRelativePath.replace(/\/[^/]+$/, '')
-    : file.name;
+  let path;
+  if (file.webkitRelativePath) {
+    // Get the directory containing the file
+    path = file.webkitRelativePath.replace(/\/[^\\]*$/, '').replace(/\/[^/]*$/, '');
+  } else {
+    // For single file selection, we can't get the full path due to browser security
+    // We'll use the file name as a fallback, but this limits auto-detection
+    path = file.name;
+  }
 
   return { valid: true, reason: 'Server verified', path };
 }
@@ -99,6 +106,7 @@ export function saveConfig(config) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     serverPath: config.serverPath || '',
     clientPath: config.clientPath || '',
+    mapPaths: config.mapPaths || [],
     serverValid: config.serverValid || false,
     clientValid: config.clientValid || false,
   }));

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { LAYERS } from '../engine/MapState.js';
+import { logger } from '../engine/Logger.js';
+import { withButtonAnimation, withInputAnimation } from '../styles/GlobalStyles.jsx';
 
 /**
  * TilePanel — right sidebar: tools, layer mode, visibility, undo/redo, tile brush.
@@ -36,6 +38,8 @@ const LAYER_META = {
 export default function TilePanel({ mapState, history }) {
   const [tilePath, setTilePath] = useState('art\\tiles\\EDG5000.frm');
   const [, forceUpdate] = useState(0);
+  const [tileBrushError, setTileBrushError] = useState(false);
+  const [buttonStates, setButtonStates] = useState({});
 
   // Re-render when mapState or history changes
   useEffect(() => {
@@ -50,6 +54,22 @@ export default function TilePanel({ mapState, history }) {
   const activeLayer = mapState?.activeLayer || 'tiles';
 
   const setTool = useCallback((tool) => {
+    // Clear previous error
+    setTileBrushError(false);
+    
+    // Check if tile tool is selected without valid tile
+    if (tool === 'tile' && (!tilePath || tilePath.trim() === '')) {
+      setTileBrushError(true);
+      logger.error('Please select a tile before using the tile brush');
+      return;
+    }
+    
+    // Set button animation state
+    setButtonStates(prev => ({ ...prev, [tool]: 'active' }));
+    setTimeout(() => {
+      setButtonStates(prev => ({ ...prev, [tool]: 'base' }));
+    }, 200);
+    
     mapState.setActiveTool(tool);
     if (tool === 'tile') mapState.setTileBrush(tilePath);
   }, [mapState, tilePath]);
@@ -65,8 +85,20 @@ export default function TilePanel({ mapState, history }) {
   const handleCategoryClick = useCallback((prefix) => {
     const path = prefix + '5000.frm';
     setTilePath(path);
+    
+    // Clear error when a valid tile is selected
+    setTileBrushError(false);
+    
+    // Set button animation state
+    setButtonStates(prev => ({ ...prev, [prefix]: 'active' }));
+    setTimeout(() => {
+      setButtonStates(prev => ({ ...prev, [prefix]: 'base' }));
+    }, 200);
+    
     mapState.setActiveTool('tile');
     mapState.setTileBrush(path);
+    
+    logger.info(`Selected tile category: ${prefix}`);
   }, [mapState]);
 
   const tileCount = mapState?.tiles?.length || 0;
@@ -80,7 +112,11 @@ export default function TilePanel({ mapState, history }) {
         {['select', 'tile', 'erase'].map((t) => (
           <button
             key={t}
-            style={activeTool === t ? styles.toolBtnActive : styles.toolBtn}
+            style={{
+              ...(activeTool === t ? styles.toolBtnActive : styles.toolBtn),
+              ...(tileBrushError && t === 'tile' && styles.toolBtnError),
+              ...withButtonAnimation({}, buttonStates[t] || 'base')
+            }}
             onClick={() => setTool(t)}
             title={`${t} (${t === 'select' ? '1' : t === 'tile' ? '2' : '3'})`}
           >
@@ -151,16 +187,28 @@ export default function TilePanel({ mapState, history }) {
       {/* ── Tile Brush (shown when tile tool active) ── */}
       {activeTool === 'tile' && (
         <>
-          <div style={styles.header}>Tile Brush</div>
+          <div style={{
+            ...styles.header,
+            ...(tileBrushError && styles.headerError)
+          }}>Tile Brush</div>
           <div style={styles.section}>
             <input
-              style={styles.input}
+              style={{
+                ...styles.input,
+                ...(tileBrushError && styles.inputError),
+                ...withInputAnimation({}, tileBrushError ? 'error' : 'base')
+              }}
               type="text"
               value={tilePath}
               onChange={handlePathChange}
               placeholder="art\tiles\EDG5000.frm"
               spellCheck={false}
             />
+            {tileBrushError && (
+              <div style={styles.errorMessage}>
+                Please select a tile from Quick Tiles below
+              </div>
+            )}
           </div>
           <div style={styles.section}>
             <div style={styles.sectionLabel}>Quick Tiles</div>
@@ -168,7 +216,10 @@ export default function TilePanel({ mapState, history }) {
               {TILE_CATEGORIES.map((cat) => (
                 <button
                   key={cat.prefix}
-                  style={styles.catBtn}
+                  style={{
+                    ...styles.catBtn,
+                    ...withButtonAnimation({}, buttonStates[cat.prefix] || 'base')
+                  }}
                   onClick={() => handleCategoryClick(cat.prefix)}
                   title={cat.prefix}
                 >
@@ -247,6 +298,28 @@ const styles = {
     fontSize: '0.72rem',
     fontWeight: 'bold',
   },
+  toolBtnError: {
+    background: '#ff4444',
+    color: '#fff',
+    border: '1px solid #ff6666',
+    animation: 'pulse 1s infinite',
+  },
+  headerError: {
+    color: '#ff4444',
+    animation: 'pulse 1s infinite',
+  },
+  inputError: {
+    borderColor: '#ff4444',
+    boxShadow: '0 0 0 1px rgba(255, 68, 68, 0.3)',
+  },
+  errorMessage: {
+    color: '#ff4444',
+    fontSize: '0.65rem',
+    marginTop: '4px',
+    padding: '2px 4px',
+    background: 'rgba(255, 68, 68, 0.1)',
+    borderRadius: '2px',
+  },
   toolBtnDisabled: {
     flex: 1,
     padding: '5px 0',
@@ -270,7 +343,9 @@ const styles = {
   layerBtn: {
     flex: 1,
     padding: '3px 6px',
-    border: '1px solid #333',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#333',
     borderRadius: 3,
     cursor: 'pointer',
     fontSize: '0.7rem',

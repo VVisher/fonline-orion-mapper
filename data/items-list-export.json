@@ -1,0 +1,360 @@
+{
+  "source": "items.lst",
+  "processing_date": "2026-02-11T02:36:24.032Z",
+  "statistics": {
+    "total_items": 48,
+    "categories": {
+      "misc": 35,
+      "ammunition": 1,
+      "armor": 2,
+      "tools": 1,
+      "food": 2,
+      "containers": 2,
+      "books": 1,
+      "keys": 2,
+      "weapons": 2
+    },
+    "file_types": {
+      ".fopro": 48
+    },
+    "comments_with_descriptions": 0
+  },
+  "items": [
+    {
+      "filename": "misc.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_sceneries.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_big_sceneries.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_scripted_items.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_ammo.fopro",
+      "category": "Ammunition",
+      "worldEditorCategory": "ammunition",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_armor.fopro",
+      "category": "Armor",
+      "worldEditorCategory": "armor",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_equipment.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "tools",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_consumables.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "food",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_collectibles.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_crafting.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_custom_container.fopro",
+      "category": "Container",
+      "worldEditorCategory": "containers",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_holodisks.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "books",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_special_items.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "phx_cryocore.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "cirno.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "trashtobewiped.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "wall_tnf.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "food.fopro",
+      "category": "Food",
+      "worldEditorCategory": "food",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "20000_21000_EXPERIMENTS.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "13300_13399_outpost.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "13200_13299_keys.fopro",
+      "category": "Key",
+      "worldEditorCategory": "keys",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "13100_13199_zc_objs.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "13000_13099_holdout.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "12000_12099_t3_items.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "23000_25000_PCG.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "15001_15099_STALKER.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "12500_12600_plants&farming.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "wall.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "generic.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "container.fopro",
+      "category": "Container",
+      "worldEditorCategory": "containers",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "door.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "keys",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "grid.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "car.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "1500_MODSMODSMODS.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "harvestable.fopro",
+      "category": "Armor",
+      "worldEditorCategory": "armor",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "15100_15299_CRITTER_WEAPONS.fopro",
+      "category": "Weapon",
+      "worldEditorCategory": "weapons",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "18000_19999_weapons.fopro",
+      "category": "Weapon",
+      "worldEditorCategory": "weapons",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "25000-25499_crafting_new.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "newshit.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "jungle.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "tall_grass.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "agore.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "abones.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "afurniture.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "arubbish.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "asigns&paintings.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "aplaceables.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    },
+    {
+      "filename": "adeadrobots.fopro",
+      "category": "Misc",
+      "worldEditorCategory": "misc",
+      "comment": "",
+      "source_file": "items.lst"
+    }
+  ]
+}

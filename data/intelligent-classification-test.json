@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "algorithm": "world_editor_intelligent_v2",
+    "processed_at": "2026-02-11T02:36:28.183Z",
+    "confidence_thresholds": {
+      "high": 0.8,
+      "medium": 0.5,
+      "low": 0.2
+    }
+  },
+  "statistics": {
+    "total": 2,
+    "high_confidence": 0,
+    "medium_confidence": 0,
+    "low_confidence": 2,
+    "categories": {
+      "deathclaws": 1,
+      "weapons": 1
+    },
+    "processing_time": 2
+  },
+  "classifications": [
+    {
+      "proto_id": 10001,
+      "name": {
+        "name": "Deathclaw Alpha",
+        "source": "TEST"
+      },
+      "classification": {
+        "primary_category": "creature",
+        "secondary_category": null,
+        "worldEditor_category": "deathclaws",
+        "confidence": 0.21374999999999997,
+        "reasoning": [
+          "Matched keywords: deathclaw, claw, death"
+        ],
+        "conflicts": [],
+        "metadata": {
+          "processed_at": "2026-02-11T02:36:28.180Z",
+          "algorithm": "world_editor_intelligent_v2"
+        }
+      },
+      "source_file": "test_deathclaw.fopro"
+    },
+    {
+      "proto_id": 20001,
+      "name": {
+        "name": "Plasma Rifle",
+        "source": "TEST"
+      },
+      "classification": {
+        "primary_category": "item",
+        "secondary_category": null,
+        "worldEditor_category": "weapons",
+        "confidence": 0.2307142857142857,
+        "reasoning": [
+          "Matched keywords: rifle",
+          "Matched properties: damage, weapon_type"
+        ],
+        "conflicts": [],
+        "metadata": {
+          "processed_at": "2026-02-11T02:36:28.182Z",
+          "algorithm": "world_editor_intelligent_v2"
+        }
+      },
+      "source_file": "test_plasma_rifle.fopro"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "totalProtos": 1,
+    "lastUpdated": "2026-02-10T21:46:16.960Z",
+    "sourceFiles": [
+      "test_item.fopro"
+    ]
+  },
+  "protos": [
+    {
+      "protoId": 1000,
+      "type": 1,
+      "name": "Sample Item 1000",
+      "category": "Test",
+      "picMap": "art\\items\\sample.frm",
+      "picInv": "art\\inven\\sample.frm",
+      "flags": 3,
+      "collision": true,
+      "interactive": true,
+      "description": "Sample proto for testing",
+      "tags": [
+        "test"
+      ],
+      "sourceFile": "test_item.fopro"
+    }
+  ]
+}

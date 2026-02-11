@@ -1,0 +1,576 @@
+{
+  "metadata": {
+    "source": "critters.lst",
+    "total_creatures": 33,
+    "categories": [
+      "Unknown",
+      "Humanoid"
+    ],
+    "file_types": [
+      "creatures.fopro",
+      "humanoids.fopro",
+      "special_characters.fopro",
+      "tutorial.fopro",
+      "d_phoenix_archives.fopro",
+      "d_scottsdale.fopro",
+      "d_slaughterhouse.fopro",
+      "d_hell_hole.fopro",
+      "f_jjjla.fopro",
+      "f_family.fopro",
+      "f_vtec.fopro",
+      "f_brahminboys.fopro",
+      "f_houndsquare.fopro",
+      "f_borealchurch.fopro",
+      "f_syndicate.fopro",
+      "f_gigscompany.fopro",
+      "april_1200-1250.fopro",
+      "h_holdout_1300-1399.fopro",
+      "c_hospital_1400-1449.fopro",
+      "c_warmart_1750-1799.fopro",
+      "corethug_1450-1499.fopro",
+      "outpost_1500-1599.fopro",
+      "c_robco_1600-1649.fopro",
+      "c_safe_1650-1699.fopro",
+      "f_rats_1700-1749.fopro",
+      "tournament_1800-1849.fopro",
+      "c_dungeons_1850-1999.fopro",
+      "2000_3000_WILDERNESS.fopro",
+      "3001_3100_drones.fopro",
+      "4000_new_core.fopro",
+      "pcg_thugs_5000-5499.fopro",
+      "vehicles_5500-5599.fopro",
+      "6000_experiments.fopro"
+    ],
+    "export_time": "2026-02-11T02:41:42.251Z"
+  },
+  "creatures": [
+    {
+      "filename": "creatures.fopro",
+      "name": "Creatures",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "creatures.fopro",
+        "Name": "Creatures",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "humanoids.fopro",
+      "name": "Humanoids",
+      "description": "",
+      "category": "Humanoid",
+      "properties": {
+        "FileName": "humanoids.fopro",
+        "Name": "Humanoids",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Humanoid",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "special_characters.fopro",
+      "name": "Special Characters",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "special_characters.fopro",
+        "Name": "Special Characters",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "tutorial.fopro",
+      "name": "Tutorial",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "tutorial.fopro",
+        "Name": "Tutorial",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "d_phoenix_archives.fopro",
+      "name": "Dungeon Phoenix Archives",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "d_phoenix_archives.fopro",
+        "Name": "Dungeon Phoenix Archives",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "d_scottsdale.fopro",
+      "name": "Dungeon Scottsdale",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "d_scottsdale.fopro",
+        "Name": "Dungeon Scottsdale",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "d_slaughterhouse.fopro",
+      "name": "Dungeon Slaughterhouse",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "d_slaughterhouse.fopro",
+        "Name": "Dungeon Slaughterhouse",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "d_hell_hole.fopro",
+      "name": "Dungeon Hell Hole",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "d_hell_hole.fopro",
+        "Name": "Dungeon Hell Hole",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_jjjla.fopro",
+      "name": "Faction Jjjla",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_jjjla.fopro",
+        "Name": "Faction Jjjla",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_family.fopro",
+      "name": "Faction Family",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_family.fopro",
+        "Name": "Faction Family",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_vtec.fopro",
+      "name": "Faction Vtec",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_vtec.fopro",
+        "Name": "Faction Vtec",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_brahminboys.fopro",
+      "name": "Faction Brahminboys",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_brahminboys.fopro",
+        "Name": "Faction Brahminboys",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_houndsquare.fopro",
+      "name": "Faction Houndsquare",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_houndsquare.fopro",
+        "Name": "Faction Houndsquare",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_borealchurch.fopro",
+      "name": "Faction Borealchurch",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_borealchurch.fopro",
+        "Name": "Faction Borealchurch",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_syndicate.fopro",
+      "name": "Faction Syndicate",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_syndicate.fopro",
+        "Name": "Faction Syndicate",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_gigscompany.fopro",
+      "name": "Faction Gigscompany",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_gigscompany.fopro",
+        "Name": "Faction Gigscompany",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "april_1200-1250.fopro",
+      "name": "April 1200 1250",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "april_1200-1250.fopro",
+        "Name": "April 1200 1250",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "h_holdout_1300-1399.fopro",
+      "name": "H Holdout 1300 1399",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "h_holdout_1300-1399.fopro",
+        "Name": "H Holdout 1300 1399",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "c_hospital_1400-1449.fopro",
+      "name": "C Hospital 1400 1449",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "c_hospital_1400-1449.fopro",
+        "Name": "C Hospital 1400 1449",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "c_warmart_1750-1799.fopro",
+      "name": "C Warmart 1750 1799",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "c_warmart_1750-1799.fopro",
+        "Name": "C Warmart 1750 1799",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "corethug_1450-1499.fopro",
+      "name": "Corethug 1450 1499",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "corethug_1450-1499.fopro",
+        "Name": "Corethug 1450 1499",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "outpost_1500-1599.fopro",
+      "name": "Outpost 1500 1599",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "outpost_1500-1599.fopro",
+        "Name": "Outpost 1500 1599",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "c_robco_1600-1649.fopro",
+      "name": "C Robco 1600 1649",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "c_robco_1600-1649.fopro",
+        "Name": "C Robco 1600 1649",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "c_safe_1650-1699.fopro",
+      "name": "C Safe 1650 1699",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "c_safe_1650-1699.fopro",
+        "Name": "C Safe 1650 1699",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "f_rats_1700-1749.fopro",
+      "name": "Faction Rats 1700 1749",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "f_rats_1700-1749.fopro",
+        "Name": "Faction Rats 1700 1749",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "tournament_1800-1849.fopro",
+      "name": "Tournament 1800 1849",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "tournament_1800-1849.fopro",
+        "Name": "Tournament 1800 1849",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "c_dungeons_1850-1999.fopro",
+      "name": "C Dungeons 1850 1999",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "c_dungeons_1850-1999.fopro",
+        "Name": "C Dungeons 1850 1999",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "2000_3000_WILDERNESS.fopro",
+      "name": "2000 3000 WILDERNESS",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "2000_3000_WILDERNESS.fopro",
+        "Name": "2000 3000 WILDERNESS",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "3001_3100_drones.fopro",
+      "name": "3001 3100 Drones",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "3001_3100_drones.fopro",
+        "Name": "3001 3100 Drones",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "4000_new_core.fopro",
+      "name": "4000 New Core",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "4000_new_core.fopro",
+        "Name": "4000 New Core",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "pcg_thugs_5000-5499.fopro",
+      "name": "Pcg Thugs 5000 5499",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "pcg_thugs_5000-5499.fopro",
+        "Name": "Pcg Thugs 5000 5499",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "vehicles_5500-5599.fopro",
+      "name": "Vehicles 5500 5599",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "vehicles_5500-5599.fopro",
+        "Name": "Vehicles 5500 5599",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    },
+    {
+      "filename": "6000_experiments.fopro",
+      "name": "6000 Experiments",
+      "description": "",
+      "category": "Unknown",
+      "properties": {
+        "FileName": "6000_experiments.fopro",
+        "Name": "6000 Experiments",
+        "Description": ""
+      },
+      "worldEditorCategory": {
+        "category": "Unknown",
+        "confidence": 0.7
+      },
+      "comment": ""
+    }
+  ]
+}

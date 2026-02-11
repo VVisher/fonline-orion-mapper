@@ -16,7 +16,12 @@ export function objTypeToLayer(mapObjType, protoId) {
   switch (mapObjType) {
     case 0: return 'critters';
     case 1: return 'items';
-    case 2: default: return 'scenery';
+    case 2: return 'scenery';
+    case 5: return 'roofs';
+    case 10: return 'doors';
+    case 11: return 'blockers';
+    case 13: return 'walls';
+    default: return 'scenery';
   }
 }
 
@@ -47,7 +52,7 @@ export class MapState {
     this.hoveredHex = null;        // { hx, hy }
 
     // Active layer for selection filtering
-    this.activeLayer = 'tiles';    // one of LAYERS
+    this.activeLayer = 'all';    // Show all layers by default
 
     // Layer visibility
     this.layerVisibility = {};
@@ -210,6 +215,26 @@ export class MapState {
     this.selectedObjects = [];
     this.selectedHex = null;
     this._notify();
+  }
+
+  /**
+   * Get the currently selected entity (object or tile)
+   * @returns {Object|null} Selected entity or null if nothing selected
+   */
+  getSelectedEntity() {
+    // Return first selected object if any
+    if (this.selectedObjects.length > 0) {
+      const index = this.selectedObjects[0];
+      return this.objects[index] ? { ...this.objects[index], index } : null;
+    }
+    
+    // Return selected hex tile if any
+    if (this.selectedHex) {
+      const tile = this.tiles.find(t => t.hx === this.selectedHex.hx && t.hy === this.selectedHex.hy);
+      return tile ? { ...tile, isTile: true } : null;
+    }
+    
+    return null;
   }
 
   subscribe(listener) {

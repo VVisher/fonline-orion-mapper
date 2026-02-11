@@ -14,6 +14,28 @@ export class History {
     this._undoStack = [];   // { label, snapshot }
     this._redoStack = [];   // { label, snapshot }
     this._listeners = new Set();
+    
+    // Performance tracking
+    this.fps = null;
+    this.latency = null;
+    this.lastFrameTime = performance.now();
+    
+    // Start performance monitoring
+    this._startPerformanceMonitoring();
+  }
+
+  /**
+   * Create a named checkpoint in the history
+   * @param {string} label - checkpoint name
+   */
+  checkpoint(label) {
+    const snap = this._snapshot();
+    this._undoStack.push({ label: `🏁 ${label}`, snapshot: snap, isCheckpoint: true });
+    if (this._undoStack.length > MAX_UNDO) {
+      this._undoStack.shift();
+    }
+    this._redoStack.length = 0;
+    this._notify();
   }
 
   /**
@@ -86,19 +108,53 @@ export class History {
     this._notify();
   }
 
-  get canUndo() { return this._undoStack.length > 0; }
-  get canRedo() { return this._redoStack.length > 0; }
-  get undoCount() { return this._undoStack.length; }
-  get redoCount() { return this._redoStack.length; }
-
-  /** Get labels for display in HistoryPanel. Most recent first. */
-  get entries() {
-    return this._undoStack.map((e, i) => ({ index: i, label: e.label })).reverse();
+  /**
+   * Get undo entries for display.
+   */
+  getUndoEntries() {
+    return [...this._undoStack].reverse();
   }
 
-  /** Get redo labels. */
-  get redoEntries() {
-    return this._redoStack.map((e, i) => ({ index: i, label: e.label }));
+  /**
+   * Get redo entries for display.
+   */
+  getRedoEntries() {
+    return [...this._redoStack];
+  }
+
+  /**
+   * Get undo count.
+   */
+  get undoCount() {
+    return this._undoStack.length;
+  }
+
+  /**
+   * Get redo count.
+   */
+  get redoCount() {
+    return this._redoStack.length;
+  }
+
+  /**
+   * Check if undo is available.
+   */
+  get canUndo() {
+    return this._undoStack.length > 0;
+  }
+
+  /**
+   * Check if redo is available.
+   */
+  get canRedo() {
+    return this._redoStack.length > 0;
+  }
+
+  /**
+   * Get labels for display in HistoryPanel. Most recent first.
+   */
+  get entries() {
+    return this._undoStack.map((e, i) => ({ index: i, label: e.label })).reverse();
   }
 
   subscribe(listener) {
@@ -126,5 +182,31 @@ export class History {
 
   _notify() {
     for (const fn of this._listeners) fn();
+  }
+
+  /**
+   * Start performance monitoring
+   */
+  _startPerformanceMonitoring() {
+    const updatePerformance = () => {
+      const now = performance.now();
+      const deltaTime = now - this.lastFrameTime;
+      this.fps = Math.round(1000 / deltaTime);
+      this.latency = Math.round(deltaTime);
+      this.lastFrameTime = now;
+    };
+    
+    // Update every 100ms
+    this._performanceInterval = setInterval(updatePerformance, 100);
+  }
+
+  /**
+   * Stop performance monitoring
+   */
+  _stopPerformanceMonitoring() {
+    if (this._performanceInterval) {
+      clearInterval(this._performanceInterval);
+      this._performanceInterval = null;
+    }
   }
 }
